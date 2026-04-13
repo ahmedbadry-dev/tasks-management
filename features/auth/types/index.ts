@@ -7,6 +7,11 @@ export type TSignUpBody = {
   }
 }
 
+export type TSignInBody = {
+  email: string
+  password: string
+}
+
 export interface AuthUser {
   id: string
   email: string
