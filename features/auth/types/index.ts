@@ -27,3 +27,7 @@ export interface AuthResponse {
   expires_in: number
   user: AuthUser
 }
+
+export type TRefreshTokenBody = {
+  refresh_token: string
+}
