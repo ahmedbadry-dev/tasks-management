@@ -1,13 +1,11 @@
-import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
 import { AuthResponse } from '../types'
 
-export const setAuthCookies = async (
-  response: AuthResponse,
-  rememberMe: boolean = false
+export const setAuthCookiesOnResponse = (
+  nextResponse: NextResponse,
+  response: AuthResponse
 ) => {
-  const cookiesStore = await cookies()
-
-  cookiesStore.set('access_token', response.access_token, {
+  nextResponse.cookies.set('access_token', response.access_token, {
     httpOnly: true,
     secure: true,
     sameSite: 'lax',
@@ -15,15 +13,14 @@ export const setAuthCookies = async (
     maxAge: response.expires_in,
   })
 
-  cookiesStore.set('refresh_token', response.refresh_token, {
+  nextResponse.cookies.set('refresh_token', response.refresh_token, {
     httpOnly: true,
     secure: true,
     sameSite: 'lax',
     path: '/',
-    ...(rememberMe && { maxAge: 60 * 60 * 24 * 30 }),
   })
 
-  cookiesStore.set(
+  nextResponse.cookies.set(
     'user',
     JSON.stringify({
       id: response.user.id,
@@ -36,7 +33,6 @@ export const setAuthCookies = async (
       secure: true,
       sameSite: 'lax',
       path: '/',
-      ...(rememberMe && { maxAge: 60 * 60 * 24 * 30 }),
     }
   )
 }
