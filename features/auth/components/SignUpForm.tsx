@@ -1,11 +1,12 @@
 "use client";
-
-import { Card } from "@/shared/components/Card"
-import { Input } from "@/shared/components/Input"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, SubmitHandler } from "react-hook-form"
+import { Card } from "@/shared/components/card";
+import { Input } from "@/shared/components/input";
 import { SignUpSchema, TSignUpSchema } from "../validations/SignUpSchema"
 import { signUpAction } from "../actions/signUpAction";
+import Link from "next/link";
+
 // import { Loader2 } from "lucide-react"
 
 
@@ -108,7 +109,9 @@ export const SignUpForm = () => {
                 {/* card footer */}
                 <div className="flex mt-4 justify-center">
                     <p className="type-body-md mr-2">Already have an account?</p>
-                    <button className="type-body-md text-primary">Login</button>
+                    <Link href="/sign-in" className="type-body-md text-primary">
+                        Login
+                    </Link>
                 </div>
             </Card>
         </div>

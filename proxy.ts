@@ -6,7 +6,8 @@ const authRoutes = ['/sign-up', '/sign-in']
 export const proxy = (request: NextRequest) => {
   const { pathname } = request.nextUrl
 
-  const accessToken = request.cookies.get('access_Token')?.value
+  const accessToken = request.cookies.get('access_token')?.value
+
   const isProtected = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   )
