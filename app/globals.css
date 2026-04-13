@@ -26,7 +26,7 @@
   --color-success: #82F9BE;
   --color-error: #BA1A1A;
   --color-warning: #FFB300;
-
+  --color-error-container: #FFDAD6;
   /* Gradient */
   --background-image-gradient-cta: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-container) 100%);
 

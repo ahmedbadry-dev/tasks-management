@@ -23,10 +23,15 @@ export const Input = <T extends FieldValues>({ name, placeholder, type, label, h
                 type={type}
                 placeholder={placeholder}
                 className={`field-input mt-1 ${error ? "is-invalid" : ""}`}
+                aria-invalid={error ? 'true' : 'false'}
                 {...register(name)}
             />
             {hint && !error && <p className="field-hint">{hint}</p>}
-            {error && <p className="field-error mt-1">{error.message}</p>}
+            {error && (
+                <p id={`${name}-error`} className="field-error mt-1">
+                    {error.message}
+                </p>
+            )}
         </div>
     )
 }

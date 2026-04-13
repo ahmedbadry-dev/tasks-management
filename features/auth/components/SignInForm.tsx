@@ -5,17 +5,31 @@ import { Input } from '@/shared/components/input'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { SignInSchema, TSignInSchema } from '../validations/SignInSchema'
 import { useForm, SubmitHandler } from 'react-hook-form'
+import { signInAction } from '../actions/signInAction';
+import Link from 'next/link';
+
 
 
 
 export const SignInForm = () => {
 
-    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
-        resolver: zodResolver(SignInSchema)
+    const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<TSignInSchema>({
+        resolver: zodResolver(SignInSchema),
+        defaultValues: {
+            email: '',
+            password: '',
+            rememberMe: false
+        },
+        mode: 'onBlur'
     })
 
-    const onSubmit: SubmitHandler<TSignInSchema> = (data) => {
-        console.log(data)
+
+    const onSubmit: SubmitHandler<TSignInSchema> = async (data) => {
+        const result = await signInAction(data)
+
+        if (result?.error) {
+            setError('root', { message: result.error })
+        }
     }
     return (
         <div className="w-full sm:w-120">
@@ -44,6 +58,9 @@ export const SignInForm = () => {
                         placeholder="Enter your password"
                         error={errors.password}
                     />
+                    {errors.root?.message && (
+                        <p className="text-sm text-red-500 mb-4">{errors.root.message}</p>
+                    )}
                     {/* Remember Me */}
 
                     <div className='flex justify-between py-4'>
@@ -69,7 +86,9 @@ export const SignInForm = () => {
                 {/* card footer */}
                 <div className="flex mt-4 justify-center">
                     <p className="type-body-md mr-2">Don't have an account? ?</p>
-                    <button className="type-body-md text-primary">Sign Up</button>
+                    <Link href="/sign-up" className="type-body-md text-primary">
+                        Sign Up
+                    </Link>
                 </div>
             </Card>
         </div>
