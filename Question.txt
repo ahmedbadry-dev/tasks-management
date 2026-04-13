@@ -3,3 +3,14 @@
 1 => time of access-token and refresh-token
 
 2 => server error in signup and signin form where we should displayed??
+
+
+
+
+جه request على protected route؟
+    ├── في access_token؟         → كمّل عادي ✅
+    ├── مفيش access_token لكن في refresh_token؟
+    │       ├── جرب تجدد
+    │       │     ├── نجح؟  → حط الـ tokens الجديدة في cookies وكمّل ✅
+    │       │     └── فشل؟ → امسح الـ cookies وروح sign-in 🔴
+    └── مفيش الاتنين؟            → روح sign-in مباشرة 🔴
