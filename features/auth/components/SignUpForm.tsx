@@ -1,11 +1,11 @@
 "use client";
-
-import { Card } from "@/shared/components/Card"
-import { Input } from "@/shared/components/Input"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, SubmitHandler } from "react-hook-form"
+import { Card } from "@/shared/components/card";
+import { Input } from "@/shared/components/input";
 import { SignUpSchema, TSignUpSchema } from "../validations/SignUpSchema"
 import { signUpAction } from "../actions/signUpAction";
+
 // import { Loader2 } from "lucide-react"
 
 

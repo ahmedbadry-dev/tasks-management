@@ -1,19 +1,20 @@
 import { TSignUpSchema } from "@/features/auth/validations/SignUpSchema"
-import { FieldError, UseFormRegister } from "react-hook-form"
+
+import { FieldError, UseFormRegister, FieldValues, Path } from "react-hook-form"
 
 
 
-interface IInputProps {
-    name: keyof TSignUpSchema,
+interface IInputProps<T extends FieldValues> {
+    name: Path<T>,
     type: string,
     placeholder: string,
     label: string,
     hint?: string,
-    register: UseFormRegister<TSignUpSchema>
+    register: UseFormRegister<T>
     error?: FieldError
 }
 
-export const Input = ({ name, placeholder, type, label, hint, register, error }: IInputProps) => {
+export const Input = <T extends FieldValues>({ name, placeholder, type, label, hint, register, error }: IInputProps<T>) => {
     return (
         <div className="field pb-4">
             <label htmlFor={label} className="field-label">{label}</label>
