@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { authService } from '../services/authService'
 import { TSignUpSchema } from '../validations/SignUpSchema'
 import { parseError } from '@/utils/parseError'
+import { setAuthCookies } from '../utils/setAuthCookies'
 
 type SignUpActionResult = { error: string } | void
 
@@ -11,7 +12,7 @@ export const signUpAction = async (
   data: TSignUpSchema
 ): Promise<SignUpActionResult> => {
   try {
-    await authService.signUp({
+    const response = await authService.signUp({
       email: data.email,
       password: data.password,
       data: {
@@ -19,6 +20,8 @@ export const signUpAction = async (
         job_title: data.jobTitle || '',
       },
     })
+    // add tokens to HttpOnly Cookies store
+    await setAuthCookies(response)
   } catch (error) {
     return { error: parseError(error) }
   }
