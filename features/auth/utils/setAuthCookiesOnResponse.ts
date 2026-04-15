@@ -1,38 +1,35 @@
 import { NextResponse } from 'next/server'
 import { AuthResponse } from '../types'
+import {
+  AUTH_COOKIE_NAMES,
+  THIRTY_DAYS_IN_SECONDS,
+  buildAuthCookieOptions,
+} from './authCookieConfig'
 
 export const setAuthCookiesOnResponse = (
   nextResponse: NextResponse,
-  response: AuthResponse
+  response: AuthResponse,
+  rememberMe: boolean = false
 ) => {
-  nextResponse.cookies.set('access_token', response.access_token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: response.expires_in,
-  })
-
-  nextResponse.cookies.set('refresh_token', response.refresh_token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-  })
+  nextResponse.cookies.set(
+    AUTH_COOKIE_NAMES.accessToken,
+    response.access_token,
+    buildAuthCookieOptions(response.expires_in)
+  )
 
   nextResponse.cookies.set(
-    'user',
-    JSON.stringify({
-      id: response.user.id,
-      email: response.user.email,
-      name: response.user.user_metadata.name,
-      department: response.user.user_metadata.department,
-    }),
-    {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      path: '/',
-    }
+    AUTH_COOKIE_NAMES.refreshToken,
+    response.refresh_token,
+    buildAuthCookieOptions(rememberMe ? THIRTY_DAYS_IN_SECONDS : undefined)
   )
+
+  if (rememberMe) {
+    nextResponse.cookies.set(
+      AUTH_COOKIE_NAMES.rememberMe,
+      '1',
+      buildAuthCookieOptions(THIRTY_DAYS_IN_SECONDS)
+    )
+  } else {
+    nextResponse.cookies.delete(AUTH_COOKIE_NAMES.rememberMe)
+  }
 }

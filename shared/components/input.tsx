@@ -17,9 +17,9 @@ interface IInputProps<T extends FieldValues> {
 export const Input = <T extends FieldValues>({ name, placeholder, type, label, hint, register, error }: IInputProps<T>) => {
     return (
         <div className="field pb-4">
-            <label htmlFor={label} className="field-label">{label}</label>
+            <label htmlFor={name} className="field-label">{label}</label>
             <input
-                id={label}
+                id={name}
                 type={type}
                 placeholder={placeholder}
                 className={`field-input mt-1 ${error ? "is-invalid" : ""}`}

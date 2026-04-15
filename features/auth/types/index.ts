@@ -31,3 +31,11 @@ export interface AuthResponse {
 export type TRefreshTokenBody = {
   refresh_token: string
 }
+
+export type TCurrentUserBody = {
+  id: string
+  email: string
+  name: string
+  department: string
+  role: string
+}

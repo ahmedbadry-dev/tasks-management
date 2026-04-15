@@ -1,5 +1,10 @@
 import { cookies } from 'next/headers'
 import { AuthResponse } from '../types'
+import {
+  AUTH_COOKIE_NAMES,
+  THIRTY_DAYS_IN_SECONDS,
+  buildAuthCookieOptions,
+} from './authCookieConfig'
 
 export const setAuthCookies = async (
   response: AuthResponse,
@@ -7,36 +12,29 @@ export const setAuthCookies = async (
 ) => {
   const cookiesStore = await cookies()
 
-  cookiesStore.set('access_token', response.access_token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: response.expires_in,
-  })
-
-  cookiesStore.set('refresh_token', response.refresh_token, {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    path: '/',
-    ...(rememberMe && { maxAge: 60 * 60 * 24 * 30 }),
-  })
+  cookiesStore.set(
+    AUTH_COOKIE_NAMES.accessToken,
+    response.access_token,
+    buildAuthCookieOptions(response.expires_in)
+  )
 
   cookiesStore.set(
-    'user',
-    JSON.stringify({
-      id: response.user.id,
-      email: response.user.email,
-      name: response.user.user_metadata.name,
-      department: response.user.user_metadata.department,
-    }),
-    {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      path: '/',
-      ...(rememberMe && { maxAge: 60 * 60 * 24 * 30 }),
-    }
+    AUTH_COOKIE_NAMES.refreshToken,
+    response.refresh_token,
+    // if user checked the remember me box so we add maxAge property to cookies stor
+    // that me browser remember the user if close the browser
+    buildAuthCookieOptions(rememberMe ? THIRTY_DAYS_IN_SECONDS : undefined)
   )
+
+  // her we save the remember me in cookies, why? base if we finds it in cookies when we refresh token will but the maxAge
+  // for consistency and user not lose the remember me
+  if (rememberMe) {
+    cookiesStore.set(
+      AUTH_COOKIE_NAMES.rememberMe,
+      '1',
+      buildAuthCookieOptions(THIRTY_DAYS_IN_SECONDS)
+    )
+  } else {
+    cookiesStore.delete(AUTH_COOKIE_NAMES.rememberMe)
+  }
 }

@@ -79,13 +79,13 @@ export const SignInForm = () => {
                         className="btn btn-primary w-full"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? "LogIn..." : "LogIn"}
+                        {isSubmitting ? 'Signing in...' : 'Sign In'}
                     </button>
                 </form>
 
                 {/* card footer */}
                 <div className="flex mt-4 justify-center">
-                    <p className="type-body-md mr-2">Don't have an account? ?</p>
+                    <p className="type-body-md mr-2">Don&apos;t have an account?</p>
                     <Link href="/sign-up" className="type-body-md text-primary">
                         Sign Up
                     </Link>
