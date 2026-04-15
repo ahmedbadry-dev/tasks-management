@@ -35,3 +35,8 @@ export const Input = <T extends FieldValues>({ name, placeholder, type, label, h
         </div>
     )
 }
+
+
+// <span className='absolute top-9.5 right-2'>
+//     <MailIcon className='text-slate-200' size={18} />
+// </span>

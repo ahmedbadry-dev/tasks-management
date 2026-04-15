@@ -6,13 +6,14 @@ import { Input } from "@/shared/components/input";
 import { SignUpSchema, TSignUpSchema } from "../validations/SignUpSchema"
 import { signUpAction } from "../actions/signUpAction";
 import Link from "next/link";
+import { PasswordRequirements } from "./PasswordRequirements";
 
 // import { Loader2 } from "lucide-react"
 
 
 export const SignUpForm = () => {
 
-    const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<TSignUpSchema>({
+    const { register, handleSubmit, formState: { errors, isSubmitting }, setError, watch } = useForm<TSignUpSchema>({
         resolver: zodResolver(SignUpSchema),
         defaultValues: {
             name: "",
@@ -23,6 +24,8 @@ export const SignUpForm = () => {
         },
         mode: "onBlur"
     })
+
+    const password = watch("password") ?? ""
 
     const onSubmit: SubmitHandler<TSignUpSchema> = async (data) => {
         const result = await signUpAction(data)
@@ -94,7 +97,7 @@ export const SignUpForm = () => {
 
                     {/* password checklist */}
                     <div className="hidden mb-4 rounded-md sm:block surface-inset">
-                        soon
+                        <PasswordRequirements password={password} />
                     </div>
 
                     <button

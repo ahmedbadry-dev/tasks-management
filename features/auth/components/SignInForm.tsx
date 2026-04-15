@@ -7,6 +7,7 @@ import { SignInSchema, TSignInSchema } from '../validations/SignInSchema'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { signInAction } from '../actions/signInAction';
 import Link from 'next/link';
+import { MailIcon } from '@/shared/components/icons';
 
 
 
@@ -64,7 +65,7 @@ export const SignInForm = () => {
                     {/* Remember Me */}
 
                     <div className='flex justify-between py-4'>
-                        <div>
+                        <div className='flex justify-center items-center'>
                             <input
                                 id='remember-me'
                                 type='checkbox'
@@ -72,14 +73,17 @@ export const SignInForm = () => {
                             />
                             <label htmlFor="remember-me" className='ml-2 cursor-pointer'>Remember Me</label>
                         </div>
-                        <p>Forgot Password?</p>
+
+                        <Link href="/forget-password" className="type-body-md text-primary">
+                            Forgot Password?
+                        </Link>
                     </div>
                     <button
                         type="submit"
-                        className="btn btn-primary w-full"
+                        className="btn btn-primary w-full mt-2"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? 'Signing in...' : 'Sign In'}
+                        {isSubmitting ? 'LogIn...' : 'LogIn'}
                     </button>
                 </form>
 
