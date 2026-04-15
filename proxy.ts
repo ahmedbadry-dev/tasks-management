@@ -6,7 +6,7 @@ import { AUTH_COOKIE_NAMES } from '@/features/auth/utils/authCookieConfig'
 import { isAccessTokenExpired } from './lib/isAccessTokenExpire'
 
 const protectedRoutes = ['/projects']
-const authRoutes = ['/sign-up', '/sign-in']
+const authRoutes = ['/sign-up', '/sign-in', '/forget-password']
 
 export const proxy = async (request: NextRequest) => {
   const { pathname } = request.nextUrl
