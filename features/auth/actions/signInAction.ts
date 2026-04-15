@@ -12,11 +12,10 @@ export const signInAction = async (data: TSignInSchema) => {
       email: data.email,
       password: data.password,
     })
-    console.log(response)
+
     // add tokens to HttpOnly Cookies store
     await setAuthCookies(response, data.rememberMe)
   } catch (error) {
-    console.log(error)
     return { error: parseError(error) }
   }
 

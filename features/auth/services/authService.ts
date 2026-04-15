@@ -1,5 +1,6 @@
 import { env } from '@/lib/env'
 import { TRefreshTokenBody, TSignInBody, TSignUpBody } from '../types'
+import { parseApiError } from '@/utils/parseApiError'
 
 export const authService = {
   signUp: async (body: TSignUpBody) => {
@@ -12,7 +13,7 @@ export const authService = {
       body: JSON.stringify(body),
     })
 
-    if (!response.ok) throw await response.json()
+    if (!response.ok) throw await parseApiError(response)
 
     return await response.json()
   },
@@ -29,7 +30,7 @@ export const authService = {
       }
     )
 
-    if (!response.ok) throw await response.json()
+    if (!response.ok) throw await parseApiError(response)
 
     return await response.json()
   },
@@ -46,8 +47,22 @@ export const authService = {
       }
     )
 
-    console.log('value that returend from refreshToken service =>>>', response)
-    if (!response.ok) throw await response.json()
+    if (!response.ok) throw await parseApiError(response)
+
+    return await response.json()
+  },
+  userinfo: async (accessToken: string) => {
+    const response = await fetch(`${env.apiUrl}/auth/v1/user`, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: {
+        'content-Type': 'application/json',
+        apikey: env.anonKey,
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    if (!response.ok) throw await parseApiError(response)
 
     return await response.json()
   },
