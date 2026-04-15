@@ -28,6 +28,7 @@
   --color-warning: #FFB300;
   --color-error-container: #FFDAD6;
   --color-dark-green: #004E32;
+  --color-text-green: #005235;
   /* Gradient */
   --background-image-gradient-cta: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-container) 100%);
 
