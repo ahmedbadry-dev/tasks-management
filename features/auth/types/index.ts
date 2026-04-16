@@ -49,3 +49,21 @@ export type ApiError = {
   error_code: string
   msg: string
 }
+
+export type UserMetadata = {
+  // email: string
+  // email_verified: boolean
+  department: string
+  name: string
+  // phone_verified: boolean
+  // sub: string
+}
+
+export type User = {
+  id: string
+  email: string
+  role: string
+  user_metadata: UserMetadata
+  created_at: string
+  last_sign_in_at: string
+}
