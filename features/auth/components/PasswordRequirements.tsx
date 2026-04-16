@@ -1,27 +1,23 @@
 import clsx from "clsx"
-import { useFormContext } from "react-hook-form"
 
-export const PasswordRequirements = ({ password }: { password: string }) => {
+type rule = {
+    label: string,
+    met: boolean
+}
+
+type PasswordRequirementsProps = {
+    password: string,
+    rules: rule[]
+}
+
+export const PasswordRequirements = ({ password, rules }: PasswordRequirementsProps) => {
     // const { watch } = useFormContext()
     // const password = watch(pass) ?? ""
 
-    const rules = [
-        {
-            label: "At least 8 characters",
-            met: password.length >= 8
-        },
-        {
-            label: "One uppercase, lowercase, and digit",
-            met: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)
-        },
-        {
-            label: "One special character",
-            met: /[^a-zA-Z0-9]/.test(password)
-        },
-    ]
+
 
     return (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col flex-wrap gap-2 sm:max-h-23">
             {rules.map((rule) => (
                 <div key={rule.label} className="flex items-center gap-2">
 

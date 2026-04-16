@@ -97,7 +97,25 @@ export const SignUpForm = () => {
 
                     {/* password checklist */}
                     <div className="hidden mb-4 rounded-md sm:block surface-inset">
-                        <PasswordRequirements password={password} />
+                        <PasswordRequirements
+                            password={password}
+                            rules={
+                                [
+                                    {
+                                        label: "At least 8 characters",
+                                        met: password.length >= 8
+                                    },
+                                    {
+                                        label: "One uppercase, lowercase, and digit",
+                                        met: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)
+                                    },
+                                    {
+                                        label: "One special character",
+                                        met: /[^a-zA-Z0-9]/.test(password)
+                                    },
+                                ]
+                            }
+                        />
                     </div>
 
                     <button
