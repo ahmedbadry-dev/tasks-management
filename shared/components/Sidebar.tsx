@@ -5,6 +5,8 @@ import clsx from "clsx"
 import { navLinks } from "@/shared/config/nav"
 import { ArrowLeftIcon, LogoutIcon } from "@/shared/components/icons"
 import { isActive } from "@/utils/isActive"
+import { startTransition, useTransition } from "react"
+import { signOutAction } from "@/features/auth/actions/signOutAction"
 
 type Props = {
     isCollapsed: boolean
@@ -16,6 +18,8 @@ type Props = {
 export const Sidebar = ({ isCollapsed, isMobileOpen, onToggleCollapse }: Props) => {
     const pathname = usePathname()
     const hideLabels = isCollapsed && !isMobileOpen
+
+
 
     return (
         <aside className={clsx(
@@ -58,29 +62,43 @@ const SidebarFooter = ({ isCollapsed, hideLabels, onToggleCollapse }: {
     isCollapsed: boolean
     hideLabels: boolean
     onToggleCollapse: () => void
-}) => (
-    <div className="border-t border-black/10 p-2">
-        <button
-            type="button"
-            onClick={onToggleCollapse}
-            className={clsx(
-                "hidden w-full items-center gap-2 rounded-md px-2 py-2 text-[12px] text-slate-600 hover:bg-white/70 md:flex",
-                isCollapsed && "md:justify-center"
-            )}
-        >
-            <ArrowLeftIcon size={12} className={clsx("transition-transform", isCollapsed && "rotate-180")} />
-            <span className={clsx(isCollapsed && "md:hidden")}>Collapse</span>
-        </button>
+}) => {
+    const [isPending, startTransition] = useTransition()
+    //   const dispatch = useAppDispatch()
 
-        <button
-            type="button"
-            className={clsx(
-                "mt-1 flex w-full items-center gap-2 rounded-md px-2 py-2 text-[12px] text-error hover:bg-error/10",
-                hideLabels && "md:justify-center"
-            )}
-        >
-            <LogoutIcon className="h-4 w-4" />
-            <span className={clsx(hideLabels && "md:hidden")}>Logout</span>
-        </button>
-    </div>
-)
+
+    const handleLogout = () => {
+        startTransition(async () => {
+            // dispatch(clearUser()) 
+            await signOutAction()
+        })
+    }
+    return (
+        <div className="border-t border-black/10 p-2">
+            <button
+                type="button"
+                onClick={onToggleCollapse}
+                className={clsx(
+                    "hidden w-full items-center gap-2 rounded-md px-2 py-2 text-[12px] text-slate-600 hover:bg-white/70 md:flex",
+                    isCollapsed && "md:justify-center"
+                )}
+            >
+                <ArrowLeftIcon size={12} className={clsx("transition-transform", isCollapsed && "rotate-180")} />
+                <span className={clsx(isCollapsed && "md:hidden")}>Collapse</span>
+            </button>
+
+            <button
+                type="button"
+                className={clsx(
+                    "mt-1 flex w-full items-center gap-2 rounded-md px-2 py-2 text-[12px] text-error hover:bg-error/10",
+                    hideLabels && "md:justify-center"
+                )}
+                onClick={handleLogout}
+                disabled={isPending}
+            >
+                <LogoutIcon className="h-4 w-4" />
+                <span className={clsx(hideLabels && "md:hidden")}>{isPending ? 'Logout...' : 'Logout'}</span>
+            </button>
+        </div>
+    )
+}
