@@ -39,3 +39,13 @@ export type TCurrentUserBody = {
   department: string
   role: string
 }
+
+export type TForgotPassword = {
+  email: string
+}
+
+export type ApiError = {
+  code: number
+  error_code: string
+  msg: string
+}
