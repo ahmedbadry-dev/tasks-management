@@ -6,7 +6,11 @@ import { setAuthCookies } from '../utils/setAuthCookies'
 import { TSignInSchema } from '../validations/SignInSchema'
 import { redirect } from 'next/navigation'
 
-export const signInAction = async (data: TSignInSchema) => {
+type SignInActionResult = { success: boolean; error: string } | void
+
+export const signInAction = async (
+  data: TSignInSchema
+): Promise<SignInActionResult> => {
   try {
     const response = await authService.signIn({
       email: data.email,
@@ -16,7 +20,7 @@ export const signInAction = async (data: TSignInSchema) => {
     // add tokens to HttpOnly Cookies store
     await setAuthCookies(response, data.rememberMe)
   } catch (error) {
-    return { error: parseError(error) }
+    return { success: false, error: parseError(error) }
   }
 
   redirect('/projects')

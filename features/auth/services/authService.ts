@@ -1,5 +1,10 @@
 import { env } from '@/lib/env'
-import { TRefreshTokenBody, TSignInBody, TSignUpBody } from '../types'
+import {
+  TForgotPassword,
+  TRefreshTokenBody,
+  TSignInBody,
+  TSignUpBody,
+} from '../types'
 import { parseApiError } from '@/utils/parseApiError'
 
 export const authService = {
@@ -60,6 +65,20 @@ export const authService = {
         apikey: env.anonKey,
         Authorization: `Bearer ${accessToken}`,
       },
+    })
+
+    if (!response.ok) throw await parseApiError(response)
+
+    return await response.json()
+  },
+  forgotPassword: async (body: TForgotPassword) => {
+    const response = await fetch(`${env.apiUrl}/auth/v1/recover`, {
+      method: 'POST',
+      headers: {
+        'content-Type': 'application/json',
+        apikey: env.anonKey,
+      },
+      body: JSON.stringify(body),
     })
 
     if (!response.ok) throw await parseApiError(response)

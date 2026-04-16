@@ -1,9 +1,8 @@
+import { ForgetPasswordForm } from "@/features/auth/components/ForgetPasswordForm"
 
 const page = () => {
     return (
-        <div>
-            forget-password
-        </div>
+        <ForgetPasswordForm />
     )
 }
 

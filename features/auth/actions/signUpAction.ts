@@ -6,7 +6,7 @@ import { TSignUpSchema } from '../validations/SignUpSchema'
 import { parseError } from '@/utils/parseError'
 import { setAuthCookies } from '../utils/setAuthCookies'
 
-type SignUpActionResult = { error: string } | void
+type SignUpActionResult = { success: boolean; error: string } | void
 
 export const signUpAction = async (
   data: TSignUpSchema
@@ -23,7 +23,7 @@ export const signUpAction = async (
     // add tokens to HttpOnly Cookies store
     await setAuthCookies(response)
   } catch (error) {
-    return { error: parseError(error) }
+    return { success: false, error: parseError(error) }
   }
 
   // Redirect the user to the main page
