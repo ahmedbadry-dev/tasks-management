@@ -25,9 +25,6 @@ export default function RootLayout({
       className={`${inter.variable} h-full antialiased`}
     >
       <body className="h-dvh min-h-svh flex flex-col overflow-hidden">
-        <Header>
-          <Logo />
-        </Header>
         <main className="flex flex-1 min-h-0 flex-col overflow-y-auto">
           {children}
         </main>

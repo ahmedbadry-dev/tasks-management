@@ -1,9 +1,5 @@
-const layout = ({ children }: { children: React.ReactNode }) => {
-    return (
-        <div className="flex flex-1 min-h-0 flex-col">
-            {children}
-        </div>
-    )
-}
+import { DashboardView } from "@/shared/components/DashboardView";
 
-export default layout
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+    return <DashboardView>{children}</DashboardView>
+}
