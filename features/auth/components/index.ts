@@ -1,2 +1,5 @@
 export { SignUpForm } from './SignUpForm'
 export { SignInForm } from './SignInForm'
+export { ForgetPasswordForm } from './ForgetPasswordForm'
+export { PasswordRequirements } from './PasswordRequirements'
+export { CreateNewPasswordForm } from './CreateNewPasswordForm'
