@@ -23,5 +23,5 @@ export const signInAction = async (
     return { success: false, error: parseError(error) }
   }
 
-  redirect('/projects')
+  redirect('/project')
 }

@@ -27,5 +27,5 @@ export const signUpAction = async (
   }
 
   // Redirect the user to the main page
-  redirect('/projects')
+  redirect('/project')
 }
