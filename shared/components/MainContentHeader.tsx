@@ -1,30 +1,38 @@
-import { PlusIcon } from "./icons"
+
+
+import clsx from "clsx"
+import Link from "next/link"
+
+
 
 type MainContentHeaderProps = {
     title: string,
-    msg: string,
+    msg?: string,
     btnText: string,
-    btnIcon: React.ReactNode
+    hidden?: boolean
+    btnIcon?: React.ReactNode
 }
 
-// {
-//     btnIcon,
-//     btnText,
-//     msg,
-//     title
-// }: MainContentHeaderProps
 
-export const MainContentHeader = () => {
+
+export const MainContentHeader = (
+    {
+        btnIcon,
+        btnText,
+        msg,
+        title,
+        hidden
+    }: MainContentHeaderProps
+) => {
+
     return (
-        <header className=" p-2 flex justify-between items-center">
+        <header className={clsx(" p-2 flex justify-between items-center", hidden && "hidden")}>
             <div>
-                {/* <h1>{title}</h1>
-                <p>{msg}</p> */}
-                <h1 className="heading-1">Projects</h1>
-                <p className="type-body-md">Manage and curate your projects</p>
+                <h1 className="heading-1">{title}</h1>
+                <p className="type-body-md">{msg}</p>
             </div>
-            <button
-                type="button"
+            <Link
+                href={'project/add'}
                 aria-label="Create New Project"
                 className="
                     btn btn-primary
@@ -35,12 +43,12 @@ export const MainContentHeader = () => {
                 "
             >
                 <span className="sm:mr-1">
-                    <PlusIcon />
+                    {btnIcon}
                 </span>
                 <span className="type-body-md text-background max-sm:hidden">
-                    Create New Project
+                    {btnText}
                 </span>
-            </button>
+            </Link>
         </header>
     )
 }
