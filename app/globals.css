@@ -100,12 +100,21 @@
   --text-heading-2--letter-spacing: 0px;
   --text-heading-2--font-weight: 600;
 
-  --text-heading-3: 0.875rem;
+  --text-heading-3: 1.125rem;
   /* 14px */
-  --text-heading-3--line-height: 1.421875rem;
+  --text-heading-3--line-height: 1.5rem;
   /* 22.75px */
   --text-heading-3--letter-spacing: 0px;
-  --text-heading-3--font-weight: 400;
+  --text-heading-3--font-weight: 500;
+
+  --text-heading-4: 0.875rem;
+  /* 14px */
+  --text-heading-4--line-height: 1.421875rem;
+  /* 22.75px */
+  --text-heading-4--letter-spacing: 0px;
+  --text-heading-4--font-weight: 400;
+
+
 
 }
 
@@ -214,8 +223,8 @@
   .heading-2 {
     font-family: var(--font-sans);
     font-size: var(--text-heading-2);
-    font-weight: 600;
-    line-height: 2rem;
+    font-weight: var(--text-heading-2--font-weight);
+    line-height: var(--text-heading-2--line-height);
     letter-spacing: 0;
     color: var(--color-slate-900);
   }
@@ -223,11 +232,29 @@
   .heading-3 {
     font-family: var(--font-sans);
     font-size: var(--text-heading-3);
+    font-weight: var(--text-heading-3--font-weight);
+    line-height: var(--text-heading-3--line-height);
+    letter-spacing: 0;
+    color: var(--color-slate-900);
+  }
+
+  .heading-4 {
+    font-family: var(--font-sans);
+    font-size: var(--text-heading-4);
+    font-weight: var(--text-heading-4--font-weight);
+    line-height: var(--text-heading-4--line-height);
+    letter-spacing: 0;
+    color: var(--color-slate-900);
+  }
+
+  /* .heading-4 {
+    font-family: var(--font-sans);
+    font-size: var(--text-heading-4);
     font-weight: 400;
     line-height: 1.421875rem;
     letter-spacing: 0;
     color: var(--color-slate-600);
-  }
+  } */
 
   /*  BTNS — shared base + variants */
 

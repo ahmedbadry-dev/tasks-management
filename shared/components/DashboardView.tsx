@@ -36,7 +36,9 @@ export const DashboardView = ({ user, children }: props) => {
                 />
 
                 <main className="min-h-0 flex-1 overflow-y-auto p-4 pb-20 md:p-6 md:pb-6">
-                    {children}
+                    <div className="@container/main mx-auto w-full max-w-7xl h-full">
+                        {children}
+                    </div>
                 </main>
             </div>
 

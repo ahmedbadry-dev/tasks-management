@@ -5,7 +5,7 @@ import { clearAuthCookies } from './features/auth/utils/clearAuthCookies'
 import { AUTH_COOKIE_NAMES } from '@/features/auth/utils/authCookieConfig'
 import { isAccessTokenExpired } from './lib/isAccessTokenExpire'
 
-const protectedRoutes = ['/projects']
+const protectedRoutes = ['/project']
 const authRoutes = ['/sign-up', '/sign-in', '/forget-password']
 
 export const proxy = async (request: NextRequest) => {
@@ -34,7 +34,7 @@ export const proxy = async (request: NextRequest) => {
   if (isAuthRoute) {
     // happy case
     if (accessToken && !isAccessTokenExpired(accessToken)) {
-      return NextResponse.redirect(new URL('/projects', request.url)) // authenticated user can not see the signin or signup page
+      return NextResponse.redirect(new URL('/project', request.url)) // authenticated user can not see the signin or signup page
     }
 
     // accessToken expired or not found and we have the refreshToken
@@ -42,7 +42,7 @@ export const proxy = async (request: NextRequest) => {
       try {
         // 1 => create redirect response to projects page
         const redirectResponse = NextResponse.redirect(
-          new URL('/projects', request.url)
+          new URL('/project', request.url)
         )
 
         // 2 => try to refreshed tokens
