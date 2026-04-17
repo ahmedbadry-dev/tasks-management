@@ -5,3 +5,8 @@ export type TProject = {
   created_by: string
   created_at: string
 }
+
+export type TAddProjectBody = {
+  name: string
+  description: string | null
+}
