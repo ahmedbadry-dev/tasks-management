@@ -39,6 +39,20 @@ export const authService = {
 
     return await response.json()
   },
+  logout: async (accessToken: string) => {
+    const response = await fetch(`${env.apiUrl}/auth/v1/logout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: env.anonKey,
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    if (!response.ok) throw await parseApiError(response)
+
+    return await response.json()
+  },
   refreshToken: async (body: TRefreshTokenBody) => {
     const response = await fetch(
       `${env.apiUrl}/auth/v1/token?grant_type=refresh_token`,

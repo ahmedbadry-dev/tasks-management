@@ -4,13 +4,19 @@ import { useSidebar } from "@/hooks/useSidebar"
 import { Header } from "./Header"
 import { MobileNav } from "./MobileNav"
 import { Sidebar } from "./Sidebar"
+import { AuthUser } from "@/features/auth/types"
 
-export const DashboardView = ({ children }: { children: React.ReactNode }) => {
+type props = {
+    children: React.ReactNode,
+    user: AuthUser
+}
+export const DashboardView = ({ user, children }: props) => {
     const { isCollapsed, isMobileOpen, toggleCollapse, toggleMobile, closeMobile } = useSidebar()
+    const { user_metadata } = user
 
     return (
         <div className="flex min-h-dvh flex-col bg-background">
-            <Header isMobileOpen={isMobileOpen} onToggleMobile={toggleMobile} />
+            <Header isMobileOpen={isMobileOpen} onToggleMobile={toggleMobile} user_metadata={user.user_metadata} />
 
             <div className="relative flex min-h-0 flex-1">
                 {/* Overlay btn to make user close menu if click out of the menu */}
