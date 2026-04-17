@@ -5,6 +5,7 @@ import { AddProjectCard } from "./AddProjectCard"
 import { Pagination } from "@/shared/components/Pagination"
 import { NoProject } from "./NoProject"
 import { TProject } from "../types"
+import { PlusIcon } from "@/shared/components/icons"
 
 type ProjectsListProps = {
     projects: TProject[]
@@ -16,7 +17,12 @@ export const ProjectsList = ({ projects }: ProjectsListProps) => {
 
     return (
         <div className={`flex min-h-0 flex-col pb-24 md:pb-0 ${hasProjects ? "gap-10" : "h-full gap-6"}`}>
-            {hasProjects && <MainContentHeader />}
+            {hasProjects && <MainContentHeader
+                btnIcon={<PlusIcon />}
+                btnText="Create New Project"
+                msg="Manage and curate your projects"
+                title="Projects"
+            />}
             <main
                 className={
                     hasProjects

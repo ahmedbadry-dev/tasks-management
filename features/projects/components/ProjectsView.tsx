@@ -1,14 +1,14 @@
 import { getSession } from "@/features/auth/utils/getSession"
 import { ProjectsList } from "./ProjectsList"
 import { redirect } from "next/navigation"
-import { projectsService } from "../services/projectsService"
+import { projectService } from "../services/projectService"
 
 export const ProjectsView = async () => {
     const session = await getSession()
     if (!session) redirect('/sign-in')
 
     // fetch projects 
-    const projects = await projectsService.getProjects(session.accessToken)
+    const projects = await projectService.getProjects(session.accessToken)
 
     return (
         <div>
