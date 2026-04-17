@@ -7,14 +7,19 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import { AddProjectFormSchema, TAddProjectFormSchema } from '../validations/AddProjectFormSchema';
 import { AddUserIcon, BellIcon, InviteUserIcon } from '@/shared/components/icons';
 import { Textarea } from '@/shared/components/Textarea';
+import { useRef, useState } from 'react';
+import { addProjectAction } from '../actions/AddProjectResult';
+import { useRouter } from 'next/navigation';
 
 
 
 
 
 export const AddProjectForm = () => {
+    const [isCanceling, setIsCanceling] = useState(false)
+    const router = useRouter()
 
-    const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<TAddProjectFormSchema>({
+    const { register, handleSubmit, formState: { errors, isSubmitting }, setError, reset } = useForm<TAddProjectFormSchema>({
         resolver: zodResolver(AddProjectFormSchema),
         defaultValues: {
             name: '',
@@ -23,10 +28,49 @@ export const AddProjectForm = () => {
         mode: 'onBlur'
     })
 
+    // abortController not work with server actions
+
+    //     const abortControllerRef = useRef<AbortController | null>(null)
+
+    //     const onSubmit: SubmitHandler<TAddProjectFormSchema> = async (data) => {
+    //         abortControllerRef.current = new AbortController()
+
+    //         const result = await addProjectAction({
+    //             name: data.name,
+    //             description: data.description ?? null,
+    //         }, abortControllerRef.current.signal)
+
+    //         if (result?.success === false) {
+    //             setError('root', { message: result.error })
+    //         }
+    //     }
+    // }
+
+
+
 
     const onSubmit: SubmitHandler<TAddProjectFormSchema> = async (data) => {
-        console.log(data)
+        const result = await addProjectAction({
+            name: data.name,
+            description: data.description ?? null,
+        })
+
+
+        if (result?.success === false) {
+            setError('root', { message: result.error })
+        }
     }
+
+
+    const handleCancel = () => {
+        setIsCanceling(true)
+        router.back()
+    }
+
+
+
+
+
     return (
         <div className="w-full sm:w-2xl">
             <div className=" bg-background rounded-lg sm:shadow-card mb-20">
@@ -71,9 +115,10 @@ export const AddProjectForm = () => {
                             <button
                                 type="button"
                                 className="btn btn-ghost mt-2 max-sm:w-full"
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || isCanceling}
+                                onClick={handleCancel}
                             >
-                                {isSubmitting ? 'Canceling...' : 'Cancel'}
+                                {isCanceling ? 'Canceling...' : 'Cancel'}
                             </button>
 
                             <button
