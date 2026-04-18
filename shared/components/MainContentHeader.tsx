@@ -9,8 +9,8 @@ type MainContentHeaderProps = {
     title: string,
     msg?: string,
     btnText: string,
-    hidden?: boolean
     btnIcon?: React.ReactNode
+    href: string
 }
 
 
@@ -21,18 +21,18 @@ export const MainContentHeader = (
         btnText,
         msg,
         title,
-        hidden
+        href
     }: MainContentHeaderProps
 ) => {
 
     return (
-        <header className={clsx(" p-2 flex justify-between items-center", hidden && "hidden")}>
+        <header className={clsx("hidden sm:flex justify-between items-center p-2")}>
             <div>
                 <h1 className="heading-1">{title}</h1>
                 <p className="type-body-md">{msg}</p>
             </div>
             <Link
-                href={'project/add'}
+                href={href}
                 aria-label="Create New Project"
                 className="
                     btn btn-primary
