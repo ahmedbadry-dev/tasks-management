@@ -5,9 +5,9 @@ import { Input } from '@/shared/components/input'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { AddProjectFormSchema, TAddProjectFormSchema } from '../validations/AddProjectFormSchema';
-import { AddUserIcon, BellIcon, InviteUserIcon } from '@/shared/components/icons';
+import { AddUserIcon, BellIcon } from '@/shared/components/icons';
 import { Textarea } from '@/shared/components/Textarea';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { addProjectAction } from '../actions/AddProjectResult';
 import { useRouter } from 'next/navigation';
 

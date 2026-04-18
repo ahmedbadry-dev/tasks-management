@@ -22,6 +22,7 @@ export const ProjectsList = ({ projects }: ProjectsListProps) => {
                 btnText="Create New Project"
                 msg="Manage and curate your projects"
                 title="Projects"
+                href="project/add"
             />}
             <main
                 className={
