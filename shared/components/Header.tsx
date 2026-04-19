@@ -1,13 +1,15 @@
 import { Logo } from "@/shared/components/Logo"
 import { MenuIcon } from "./icons"
-import { UserMetadata } from "@/features/auth/types"
 import { ProfileImg } from "./profileImg"
 
 
 type Props = {
     isMobileOpen: boolean
     onToggleMobile: () => void
-    user_metadata: UserMetadata
+    user_metadata?: {
+        name?: string
+        department?: string
+    } | null
 }
 
 export const Header = ({ isMobileOpen, onToggleMobile, user_metadata }: Props) => (
@@ -33,11 +35,11 @@ export const Header = ({ isMobileOpen, onToggleMobile, user_metadata }: Props) =
 
         <div className="flex items-center gap-2">
             <div className="hidden text-right leading-tight md:block">
-                <p className="type-body-md font-semibold text-slate-900">{user_metadata.name}</p>
-                <p className="type-label-sm text-[10px] text-primary-container">{user_metadata.department}</p>
+                <p className="type-body-md font-semibold text-slate-900">{user_metadata?.name}</p>
+                <p className="type-label-sm text-[10px] text-primary-container">{user_metadata?.department}</p>
             </div>
             <ProfileImg
-                name={user_metadata.name}
+                name={user_metadata?.name}
                 rounded="rounded-md"
             />
         </div>

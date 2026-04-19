@@ -4,7 +4,6 @@ import { useSidebar } from "@/hooks/useSidebar"
 import { Header } from "./Header"
 import { MobileNav } from "./MobileNav"
 import { Sidebar } from "./Sidebar"
-import { UserMetadata } from "@/features/auth/types"
 import { useAppSelector } from "@/store/hooks"
 import { selectUserMetadata } from "@/store/userStore/userSlice"
 
@@ -18,7 +17,7 @@ export const DashboardView = ({ children }: props) => {
 
     return (
         <div className="flex min-h-dvh flex-col bg-background">
-            <Header isMobileOpen={isMobileOpen} onToggleMobile={toggleMobile} user_metadata={userMetadata as UserMetadata} />
+            <Header isMobileOpen={isMobileOpen} onToggleMobile={toggleMobile} user_metadata={userMetadata} />
 
             <div className="relative flex min-h-0 flex-1">
                 {/* Overlay btn to make user close menu if click out of the menu */}
