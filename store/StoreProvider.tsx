@@ -4,7 +4,7 @@
 import { useRef } from 'react'
 import { Provider } from 'react-redux'
 import { makeStore, AppStore } from './index'
-import { setUser } from './slices/userSlice'
+import { setUser } from './userStore/userSlice'
 import { AuthUser } from '@/features/auth/types'
 
 type Props = {
