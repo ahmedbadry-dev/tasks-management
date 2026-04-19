@@ -8,7 +8,7 @@ import { clearUser } from "@/store/userStore/userSlice"
 
 
 type profileImgProps = {
-    name: string,
+    name?: string | null,
     rounded: string
 }
 export const ProfileImg = ({ name, rounded }: profileImgProps) => {

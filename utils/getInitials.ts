@@ -1,5 +1,8 @@
-export const getInitials = (name: string) => {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
+export const getInitials = (name?: string | null) => {
+  const safeName = name?.trim()
+  if (!safeName) return 'GS'
+
+  const parts = safeName.split(/\s+/).filter(Boolean)
 
   if (parts.length === 0) return 'GS'
 
