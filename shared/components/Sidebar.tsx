@@ -7,6 +7,8 @@ import { ArrowLeftIcon, LogoutIcon } from "@/shared/components/icons"
 import { isActive } from "@/utils/isActive"
 import { startTransition, useTransition } from "react"
 import { signOutAction } from "@/features/auth/actions/signOutAction"
+import { useAppDispatch } from "@/store/hooks"
+import { clearUser } from "@/store/userStore/userSlice"
 
 type Props = {
     isCollapsed: boolean
@@ -18,8 +20,6 @@ type Props = {
 export const Sidebar = ({ isCollapsed, isMobileOpen, onToggleCollapse }: Props) => {
     const pathname = usePathname()
     const hideLabels = isCollapsed && !isMobileOpen
-
-
 
     return (
         <aside className={clsx(
@@ -64,12 +64,12 @@ const SidebarFooter = ({ isCollapsed, hideLabels, onToggleCollapse }: {
     onToggleCollapse: () => void
 }) => {
     const [isPending, startTransition] = useTransition()
-    //   const dispatch = useAppDispatch()
+    const dispatch = useAppDispatch()
 
 
     const handleLogout = () => {
         startTransition(async () => {
-            // dispatch(clearUser()) 
+            dispatch(clearUser())
             await signOutAction()
         })
     }
