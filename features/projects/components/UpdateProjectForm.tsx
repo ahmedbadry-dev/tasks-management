@@ -8,59 +8,44 @@ import { AddProjectFormSchema, TAddProjectFormSchema } from '../validations/AddP
 import { AddUserIcon, BellIcon } from '@/shared/components/icons';
 import { Textarea } from '@/shared/components/Textarea';
 import { useState } from 'react';
-import { addProjectAction } from '../actions/addProjectAction';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { updateProjectAction } from '../actions/updateProjectAction';
+import { TProject } from '../types';
+import { TUpdateProjectFormSchema, UpdateProjectFormSchema } from '../validations/UpdateProjectFormSchema';
 
 
+type UpdateProjectFormProps = {
+    projectDetails: TProject
+}
 
 
-
-export const AddProjectForm = () => {
+export const UpdateProjectForm = ({ projectDetails }: UpdateProjectFormProps) => {
     const [isCanceling, setIsCanceling] = useState(false)
     const router = useRouter()
 
-    const { register, handleSubmit, formState: { errors, isSubmitting }, setError, reset } = useForm<TAddProjectFormSchema>({
-        resolver: zodResolver(AddProjectFormSchema),
+    const { projectId } = useParams<{ projectId: string }>()
+
+    const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<TUpdateProjectFormSchema>({
+        resolver: zodResolver(UpdateProjectFormSchema),
         defaultValues: {
-            name: '',
-            description: ''
+            name: projectDetails.name,
+            description: projectDetails.description ?? ''
         },
         mode: 'onBlur'
     })
 
-    // abortController not work with server actions
-
-    //     const abortControllerRef = useRef<AbortController | null>(null)
-
-    //     const onSubmit: SubmitHandler<TAddProjectFormSchema> = async (data) => {
-    //         abortControllerRef.current = new AbortController()
-
-    //         const result = await addProjectAction({
-    //             name: data.name,
-    //             description: data.description ?? null,
-    //         }, abortControllerRef.current.signal)
-
-    //         if (result?.success === false) {
-    //             setError('root', { message: result.error })
-    //         }
-    //     }
-    // }
 
 
-
-
-    const onSubmit: SubmitHandler<TAddProjectFormSchema> = async (data) => {
-        const result = await addProjectAction({
+    const onSubmit: SubmitHandler<TUpdateProjectFormSchema> = async (data) => {
+        const result = await updateProjectAction(projectId, {
             name: data.name,
             description: data.description ?? null,
         })
-
 
         if (result?.success === false) {
             setError('root', { message: result.error })
         }
     }
-
 
     const handleCancel = () => {
         setIsCanceling(true)
@@ -81,7 +66,7 @@ export const AddProjectForm = () => {
                             <AddUserIcon className='text-primary' />
                         </div>
                         <div>
-                            <h1 className="heading-2">Initialize New Project</h1>
+                            <h1 className="heading-2">Update Yore Project</h1>
                             <p className="type-body-md">Define the scope and foundational details of your project.</p>
                         </div>
                     </div>
@@ -110,7 +95,6 @@ export const AddProjectForm = () => {
                             <p className="text-sm text-red-500 mb-4">{errors.root.message}</p>
                         )}
 
-
                         <div className='flex flex-col-reverse justify-between items-center   py-4 sm:flex-row '>
                             <button
                                 type="button"
@@ -126,7 +110,7 @@ export const AddProjectForm = () => {
                                 className="btn btn-primary mt-2 max-sm:w-full "
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting ? 'Create Project...' : 'Create Project'}
+                                {isSubmitting ? 'Updating...' : 'Save'}
                             </button>
                         </div>
                     </form>

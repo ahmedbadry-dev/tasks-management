@@ -1,7 +1,13 @@
 import { env } from '@/lib/env'
-import { PaginatedResponse, TAddProjectBody, TProject } from '../types'
+import {
+  PaginatedResponse,
+  TAddProjectBody,
+  TProject,
+  TUpdateProjectBody,
+} from '../types'
 import { parseApiError } from '@/utils/parseApiError'
 import { PROJECTS_PAGE_SIZE } from '../constants'
+import { toSafeProjectId } from '../utils/toSafeProjectId'
 
 export const projectService = {
   getProjects: async (
@@ -48,5 +54,46 @@ export const projectService = {
     })
 
     if (!response.ok) throw await parseApiError(response)
+  },
+  updateProject: async (
+    project_id: string,
+    body: TUpdateProjectBody,
+    accessToken: string
+  ) => {
+    const safeProjectId = toSafeProjectId(project_id)
+
+    const response = await fetch(
+      `${env.apiUrl}/rest/v1/projects?id=eq.${safeProjectId}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: env.anonKey,
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(body),
+      }
+    )
+    if (!response.ok) throw await parseApiError(response)
+  },
+  getProjectDetailsById: async (
+    project_id: string,
+    accessToken: string
+  ): Promise<TProject[]> => {
+    const safeProjectId = toSafeProjectId(project_id)
+    const response = await fetch(
+      `${env.apiUrl}/rest/v1/projects?id=eq.${safeProjectId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: env.anonKey,
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    )
+    if (!response.ok) throw await parseApiError(response)
+
+    return await response.json()
   },
 }

@@ -27,3 +27,8 @@ export type PaginatedResponse<T> = {
   data: T[]
   totalCount: number
 }
+
+export type TUpdateProjectBody = {
+  name: string
+  description: string | null
+}
