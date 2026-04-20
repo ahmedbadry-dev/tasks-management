@@ -8,7 +8,7 @@ import { AddProjectFormSchema, TAddProjectFormSchema } from '../validations/AddP
 import { AddUserIcon, BellIcon } from '@/shared/components/icons';
 import { Textarea } from '@/shared/components/Textarea';
 import { useState } from 'react';
-import { addProjectAction } from '../actions/AddProjectResult';
+import { addProjectAction } from '../actions/addProjectAction';
 import { useRouter } from 'next/navigation';
 
 
