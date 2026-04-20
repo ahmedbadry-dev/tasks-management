@@ -8,9 +8,9 @@ import Link from "next/link"
 type MainContentHeaderProps = {
     title: string,
     msg?: string,
-    btnText: string,
+    btnText?: string,
     btnIcon?: React.ReactNode
-    href: string
+    href?: string
 }
 
 
@@ -31,7 +31,7 @@ export const MainContentHeader = (
                 <h1 className="heading-1">{title}</h1>
                 <p className="type-body-md">{msg}</p>
             </div>
-            <Link
+            {href && <Link
                 href={href}
                 aria-label="Create New Project"
                 className="
@@ -48,7 +48,7 @@ export const MainContentHeader = (
                 <span className="type-body-md text-background max-sm:hidden">
                     {btnText}
                 </span>
-            </Link>
+            </Link>}
         </header>
     )
 }
