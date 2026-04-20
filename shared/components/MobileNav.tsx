@@ -1,12 +1,14 @@
 'use client'
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { useParams, usePathname } from "next/navigation"
 import clsx from "clsx"
-import { navLinks } from "@/shared/config/nav"
+import { getNavLinks } from "@/shared/config/nav"
 import { isActive } from "@/utils/isActive"
 
 export const MobileNav = ({ hidden }: { hidden: boolean }) => {
     const pathname = usePathname()
+    const { projectId } = useParams<{ projectId: string }>()
+    const links = getNavLinks(projectId)
 
     return (
         <nav className={clsx(
@@ -14,7 +16,7 @@ export const MobileNav = ({ hidden }: { hidden: boolean }) => {
             hidden && "pointer-events-none opacity-0"
         )}>
             <ul className="flex h-16">
-                {navLinks.map((item) => {
+                {links.map((item) => {
                     const active = isActive(pathname, item.href)
                     return (
                         <li key={item.label} className="flex-1">

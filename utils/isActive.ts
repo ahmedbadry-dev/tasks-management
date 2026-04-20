@@ -7,6 +7,12 @@ export const isActive = (pathname: string, href: string) => {
     return true
   }
 
+  // only active if /project or /project/add
+  // not active when /project/[projectId]/---
+  if (href === '/project') {
+    return pathname === '/project' || pathname.startsWith('/project/add')
+  }
+
   if (pathname.startsWith(href + '/')) {
     return true
   }
