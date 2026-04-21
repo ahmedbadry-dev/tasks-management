@@ -16,9 +16,9 @@ export const UpdateProjectView = async ({ projectId }: UpdateProjectViewProps) =
 
     return (
         <div>
-            <MainContentHeader
+            {/* <MainContentHeader
                 title="Update Yore Project"
-            />
+            /> */}
             <div className=" flex justify-center  pt-10">
                 <UpdateProjectForm projectDetails={projectDetails} />
             </div>

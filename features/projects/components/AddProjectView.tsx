@@ -11,7 +11,7 @@ export const AddProjectView = () => {
                 btnIcon={<InviteUserIcon />}
                 href="#"
             />
-            <div className=" flex justify-center  pt-10">
+            <div className=" flex justify-center pt-5 sm:pt-10">
                 <AddProjectForm />
             </div>
         </div>
