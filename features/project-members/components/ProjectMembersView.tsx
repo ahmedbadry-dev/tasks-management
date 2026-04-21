@@ -2,8 +2,19 @@ import { MainContentHeader } from "@/shared/components/MainContentHeader"
 import { MembersDesktopTable } from "./MembersDesktopTable"
 import { MembersMobileList } from "./MembersMobileList"
 import { InviteUserIcon } from "@/shared/components/icons"
+import { getProjectMembersAction } from "../actions/getProjectMembersAction"
+import { redirect } from "next/navigation"
 
-export const ProjectMembersView = () => {
+
+type ProjectMembersViewProps = {
+    projectId: string
+}
+export const ProjectMembersView = async ({ projectId }: ProjectMembersViewProps) => {
+
+    const result = await getProjectMembersAction(projectId)
+    if (!result.success) redirect('/project')
+
+
     return (
         <div>
             <MainContentHeader
@@ -14,10 +25,10 @@ export const ProjectMembersView = () => {
             />
             {/* desktop view */}
             <div className="hidden md:flex justify-center pt-10">
-                <MembersDesktopTable />
+                <MembersDesktopTable data={result} />
             </div>
             <div className="flex justify-center pt-5 md:hidden ">
-                <MembersMobileList />
+                <MembersMobileList data={result} />
             </div>
         </div>
     )

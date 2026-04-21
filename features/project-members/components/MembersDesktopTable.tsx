@@ -2,14 +2,21 @@
 import { cn } from '@/utils/cn'
 import { MemberRow } from './MemberRow'
 import { MembersTableHeader } from './MembersTableHeader'
+import { TProjectMember } from '../types'
 
-export const MembersDesktopTable = () => {
-    const test = [...Array(4)]
+type MembersDesktopTableProps = {
+    data: { success: true, data: TProjectMember[] }
+}
+export const MembersDesktopTable = ({ data: { data, success } }: MembersDesktopTableProps) => {
 
-    const members = test.map((_, idx) => {
-        const isLastItem = idx === test.length - 1;
+    if (!success) return <p>error</p>
+
+    const members = data.map((member, idx) => {
+        const isLastItem = idx === data.length - 1;
         return (
-            <MemberRow key={idx}
+            <MemberRow
+                key={member.member_id}
+                member={member}
                 className={cn(
                     "border-b border-surface-highest/50",
                     isLastItem && "border-b-0 rounded-b-lg"

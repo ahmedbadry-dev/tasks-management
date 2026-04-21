@@ -1,19 +1,18 @@
 import React from 'react'
 import { MemberCard } from './MemberCard'
+import { TProjectMember } from '../types'
 
-export const MembersMobileList = () => {
+type MembersMobileListProps = {
+    data: { success: true, data: TProjectMember[] }
+}
 
-    const test = [...Array(4)]
+export const MembersMobileList = ({ data: { data, success } }: MembersMobileListProps) => {
 
-    const members = test.map((_, idx) => {
-        const isLastItem = idx === test.length - 1;
+    if (!success) return <p>error</p>
+
+    const members = data.map((member) => {
         return (
-            <MemberCard key={idx}
-            // className={cn(
-            //     "border-b border-surface-highest/50",
-            //     isLastItem && "border-b-0 rounded-b-lg"
-            // )} 
-            />
+            <MemberCard key={member.member_id} member={member} />
         )
     })
     return (
