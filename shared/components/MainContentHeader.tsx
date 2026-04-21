@@ -1,6 +1,6 @@
 
 
-import clsx from "clsx"
+import { cn } from "@/utils/cn"
 import Link from "next/link"
 
 
@@ -11,6 +11,7 @@ type MainContentHeaderProps = {
     btnText?: string,
     btnIcon?: React.ReactNode
     href?: string
+    className?: string
 }
 
 
@@ -21,12 +22,13 @@ export const MainContentHeader = (
         btnText,
         msg,
         title,
-        href
+        href,
+        className
     }: MainContentHeaderProps
 ) => {
 
     return (
-        <header className={clsx("hidden sm:flex justify-between items-center p-2")}>
+        <header className={cn("flex justify-between items-center p-2", className)}>
             <div>
                 <h1 className="heading-1">{title}</h1>
                 <p className="type-body-md">{msg}</p>
