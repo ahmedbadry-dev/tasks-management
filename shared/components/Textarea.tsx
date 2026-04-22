@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { FieldError, Path, UseFormRegister } from 'react-hook-form'
 import { TextareaHTMLAttributes } from 'react'
+import { cn } from '@/utils/cn'
 
 type TextareaProps<T extends Record<string, unknown>> = {
     name: Path<T>
-    label: string
+    label?: string
     register: UseFormRegister<T>
     error?: FieldError
     hint?: string
     maxLength?: number
     required?: boolean
+    className?: string
 } & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'name'>
 
 export const Textarea = <T extends Record<string, unknown>>({
@@ -30,11 +32,11 @@ export const Textarea = <T extends Record<string, unknown>>({
     const describedBy = error ? errorId : hint ? hintId : undefined
 
     return (
-        <div className="field pb-4">
+        <div className={cn("field pb-4 ", className)}>
             <div className='flex justify-between'>
-                <label htmlFor={name} className="field-label">
+                {label && <label htmlFor={name} className="field-label">
                     {label}
-                </label>
+                </label>}
                 {/* hint */}
                 {hint && <p id={hintId} className="field-hint">
                     {hint}
@@ -43,7 +45,7 @@ export const Textarea = <T extends Record<string, unknown>>({
             <textarea
                 id={name}
                 maxLength={maxLength}
-                className={`field-input mt-1 resize-none ${error ? 'is-invalid' : ''} ${className ?? ''}`}
+                className={`field-input mt-1 resize-none ${error ? 'is-invalid' : ''}`}
                 aria-invalid={error ? 'true' : 'false'}
                 aria-describedby={describedBy}
                 aria-required={required ? 'true' : 'false'}
