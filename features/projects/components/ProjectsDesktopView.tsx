@@ -13,41 +13,45 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks"
 import {
     selectProjects,
     selectProjectsError,
-    selectProjectsIsInitialLoading,
+    selectProjectsStatus,
     selectProjectsTotalCount
 } from "../store/projectsSlice"
+import { ProjectsPageSkeleton } from "./ProjectsPageSkeleton"
+import { ErrorState } from "@/shared/components/ErrorState"
 
 
 export const ProjectsDesktopView = ({ accessToken }: { accessToken: string }) => {
 
-    // const {
-    //     error,
-    //     hasNextPage,
-    //     hasProjects,
-    //     isDesktop,
-    //     isFetchingPage,
-    //     isInitialLoading,
-    //     loadMoreRef,
-    //     projects
-    // } = useProjectList(accessToken)
-
     const dispatch = useAppDispatch()
     const projects = useAppSelector(selectProjects)
     const totalCount = useAppSelector(selectProjectsTotalCount)
-    const isInitialLoading = useAppSelector(selectProjectsIsInitialLoading)
+    const status = useAppSelector(selectProjectsStatus)
     const error = useAppSelector(selectProjectsError)
     const hasProjects = projects.length > 0
     const hasAnyProjects = totalCount > 0
 
 
     useEffect(() => {
-        dispatch(fetchProjectsPage({ accessToken: accessToken, page: 1 }))
+        dispatch(fetchProjectsPage({ accessToken, page: 1 }))
     }, [dispatch, accessToken])
 
 
 
-    if (isInitialLoading && !hasProjects) return <p className="hidden md:block">InitialLoading...</p>
-    if (error && !hasProjects) return <p className="hidden md:block">{error}</p>
+    if ((status === 'idle' || status === 'loading') && !hasProjects) {
+        return <div className="hidden md:block"><ProjectsPageSkeleton /></div>
+    }
+
+    if (status === 'failed' && !hasProjects) {
+        return (
+            <div className="hidden md:block">
+                <ErrorState
+                    title="Failed to load projects"
+                    message={error ?? "Please try again."}
+                    onRetry={() => dispatch(fetchProjectsPage({ accessToken, page: 1 }))}
+                />
+            </div>
+        )
+    }
 
 
     return (
@@ -82,7 +86,7 @@ export const ProjectsDesktopView = ({ accessToken }: { accessToken: string }) =>
 
             </main>
             {hasAnyProjects && <ProjectsPagination accessToken={accessToken} />}
-            {!hasAnyProjects && <NoProject />}
+            {status === 'succeeded' && !hasAnyProjects && <NoProject />}
         </div>
     )
 }

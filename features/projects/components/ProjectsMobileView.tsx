@@ -6,6 +6,7 @@ import {
     selectProjectsError,
     selectProjectsHasNextPage,
     selectProjectsIsFetchingPage,
+    selectProjectsStatus,
     selectProjectsTotalCount
 } from "../store/projectsSlice"
 import { useEffect, useRef } from "react"
@@ -15,6 +16,8 @@ import { PlusIcon } from "@/shared/components/icons"
 import { ProjectCard } from "./ProjectCard"
 import { AddProjectCard } from "./AddProjectCard"
 import { NoProject } from "./NoProject"
+import { ProjectsPageSkeleton } from "./ProjectsPageSkeleton"
+import { ErrorState } from "@/shared/components/ErrorState"
 
 export const ProjectsMobileView = ({ accessToken }: { accessToken: string }) => {
 
@@ -23,6 +26,7 @@ export const ProjectsMobileView = ({ accessToken }: { accessToken: string }) => 
     const totalCount = useAppSelector(selectProjectsTotalCount)
     const hasProjects = projects.length > 0
     const hasAnyProjects = totalCount > 0
+    const status = useAppSelector(selectProjectsStatus)
     const isFetchingPage = useAppSelector(selectProjectsIsFetchingPage)
     const hasNextPage = useAppSelector(selectProjectsHasNextPage)
     const error = useAppSelector(selectProjectsError)
@@ -62,6 +66,29 @@ export const ProjectsMobileView = ({ accessToken }: { accessToken: string }) => 
 
         return () => observer.disconnect()
     }, [dispatch, hasNextPage, isFetchingPage, accessToken])
+
+    if ((status === 'idle' || status === 'loading') && !hasProjects) {
+        return (
+            <div className="md:hidden">
+                <ProjectsPageSkeleton />
+            </div>
+        )
+    }
+
+    if (status === 'failed' && !hasProjects) {
+        return (
+            <div className="md:hidden">
+                <ErrorState
+                    title="Failed to load projects"
+                    message={error ?? "Please try again."}
+                    onRetry={() => dispatch(fetchNextProjects({ accessToken }))}
+                />
+            </div>
+        )
+    }
+
+
+
     return (
         <div className="md:hidden">
             {hasProjects && (
@@ -84,7 +111,7 @@ export const ProjectsMobileView = ({ accessToken }: { accessToken: string }) => 
                 {/*  */}
                 {hasProjects ? (
                     projects.map((project) => <ProjectCard key={project.id} {...project} />)
-                ) : !hasAnyProjects ? (
+                ) : status === 'succeeded' && !hasAnyProjects ? (
                     <NoProject />
                 ) : null}
 

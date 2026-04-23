@@ -5,7 +5,7 @@ import {
   selectProjectsError,
   selectProjectsHasNextPage,
   selectProjectsIsFetchingPage,
-  selectProjectsIsInitialLoading,
+  selectProjectsStatus,
 } from '../store/projectsSlice'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
@@ -18,7 +18,8 @@ export const useProjectList = (accessToken: string) => {
   const dispatch = useAppDispatch()
   const projects = useAppSelector(selectProjects)
   const hasNextPage = useAppSelector(selectProjectsHasNextPage)
-  const isInitialLoading = useAppSelector(selectProjectsIsInitialLoading)
+  const status = useAppSelector(selectProjectsStatus)
+  const isInitialLoading = status === 'loading' && projects.length === 0
   const isFetchingPage = useAppSelector(selectProjectsIsFetchingPage)
   const error = useAppSelector(selectProjectsError)
   const loadMoreRef = useRef<HTMLDivElement | null>(null) // this ref for the sentinel element to make the infinite scroll

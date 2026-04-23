@@ -5,7 +5,7 @@ type ProjectPageSkeletonProps = {
     count?: number
 }
 
-export const ProjectPageSkeleton = ({ count = 6 }: ProjectPageSkeletonProps) => {
+export const ProjectsPageSkeleton = ({ count = 6 }: ProjectPageSkeletonProps) => {
     return (
         <div className="flex min-h-0 flex-col gap-10 pb-24 md:pb-0">
             {/* MainContentHeader skeleton */}

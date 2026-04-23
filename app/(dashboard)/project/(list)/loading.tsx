@@ -1,9 +1,11 @@
-import { ProjectPageSkeleton } from "@/features/projects/components/ProjectPageSkeleton"
-import { SkeletonBlock } from "@/shared/components/SkeletonBlock"
+import { Spinner } from "@/shared/components/Spinner"
+
 
 const loading = () => {
     return (
-        <ProjectPageSkeleton />
+        <div className="flex min-h-[80vh] items-center justify-center">
+            <Spinner />
+        </div>
     )
 }
 

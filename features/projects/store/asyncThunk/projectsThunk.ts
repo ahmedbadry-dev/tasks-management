@@ -55,7 +55,7 @@ export const fetchNextProjects = createAsyncThunk(
     condition: (_, { getState }) => {
       const state = getState() as RootState
 
-      if (state.projects.isInitialLoading || state.projects.isFetchingPage) {
+      if (state.projects.status === 'loading' || state.projects.isFetchingPage) {
         return false
       }
 
