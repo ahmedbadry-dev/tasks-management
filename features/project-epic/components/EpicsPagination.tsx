@@ -10,8 +10,6 @@ type Props = {
   accessToken: string
 }
 
-
-
 export const EpicsPagination = ({ accessToken, projectId }: Props) => {
   const dispatch = useAppDispatch()
   const currentPage = useAppSelector(selectEpicsCurrentPage)

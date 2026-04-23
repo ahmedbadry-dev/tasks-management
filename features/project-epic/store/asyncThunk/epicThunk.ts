@@ -52,5 +52,21 @@ export const fetchNextEpicsPage = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(parseError(error))
     }
+  }, // this condition is firing before the thunk
+  // what it doing prevent duplicate requests if i have a request
+  // prevent request if i do not have next page
+  {
+    condition: (_, { getState }) => {
+      const state = getState() as RootState
+
+      if (
+        state.projectEpics.isInitialLoading ||
+        state.projectEpics.isFetchingPage
+      ) {
+        return false
+      }
+
+      return state.projectEpics.hasNextPage
+    },
   }
 )
