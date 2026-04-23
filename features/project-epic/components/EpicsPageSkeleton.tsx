@@ -1,13 +1,13 @@
 import { SkeletonBlock } from "@/shared/components/SkeletonBlock"
-import { ProjectCardSkeleton } from "./ProjectCardSkeleton"
+import { EpicCardSkeleton } from "./EpicCardSkeleton"
 
-type ProjectPageSkeletonProps = {
+type EpicsPageSkeletonProps = {
     count?: number
 }
 
-export const ProjectPageSkeleton = ({ count = 6 }: ProjectPageSkeletonProps) => {
+export const EpicsPageSkeleton = ({ count = 6 }: EpicsPageSkeletonProps) => {
     return (
-        <div className="flex min-h-0 flex-col gap-10 pb-24 md:pb-0">
+        <div className="flex min-h-0 flex-col gap-10 pb-10">
             {/* MainContentHeader skeleton */}
             <header className="hidden items-center justify-between p-2 sm:flex">
                 <div className="flex flex-col gap-2">
@@ -20,9 +20,10 @@ export const ProjectPageSkeleton = ({ count = 6 }: ProjectPageSkeletonProps) => 
             {/* Grid skeleton */}
             <main className="grid min-h-0 grid-cols-1 gap-6 @3xl/main:grid-cols-2 @5xl/main:grid-cols-3">
                 {Array.from({ length: count }).map((_, i) => (
-                    <ProjectCardSkeleton key={i} />
+                    <EpicCardSkeleton key={i} />
                 ))}
             </main>
         </div>
     )
 }
+

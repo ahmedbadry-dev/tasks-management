@@ -17,7 +17,7 @@ export type ProjectsState = {
   totalCount: number
   limit: number
   hasNextPage: boolean
-  isInitialLoading: boolean
+  status: 'idle' | 'loading' | 'succeeded' | 'failed'
   isFetchingPage: boolean
   error: string | null
   activeRequestId: string | null

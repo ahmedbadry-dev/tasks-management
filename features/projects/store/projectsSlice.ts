@@ -13,7 +13,7 @@ const initialState: ProjectsState = {
   limit: PROJECTS_PAGE_SIZE,
   totalCount: 0,
   hasNextPage: false,
-  isInitialLoading: false,
+  status: 'idle',
   isFetchingPage: false,
   error: null,
   activeRequestId: null, // we used it tp protect from stale responses
@@ -30,7 +30,7 @@ const projectsSlice = createSlice({
       .addCase(fetchProjectsPage.pending, (state, action) => {
         state.error = null
         state.activeRequestId = action.meta.requestId // save the id of this request
-        state.isInitialLoading = state.items.length === 0
+        state.status = 'loading'
         state.isFetchingPage = state.items.length > 0
       })
       .addCase(fetchProjectsPage.fulfilled, (state, action) => {
@@ -43,22 +43,21 @@ const projectsSlice = createSlice({
         // page=1, limit=10, total=25 -> 10 < 25 -> true
         // page=3, limit=10, total=25 -> 30 < 25 -> false
         state.hasNextPage = page * state.limit < totalCount
-        state.isInitialLoading = false
+        state.status = 'succeeded'
         state.isFetchingPage = false
         state.activeRequestId = null
       })
       .addCase(fetchProjectsPage.rejected, (state, action) => {
         if (state.activeRequestId !== action.meta.requestId) return // ignore old errors
 
-        state.isInitialLoading = false
         state.isFetchingPage = false
         state.activeRequestId = null
+        state.status = 'failed'
         state.error = (action.payload as string) ?? 'Failed to load projects'
       })
       .addCase(fetchNextProjects.pending, (state, action) => {
         state.error = null
         state.activeRequestId = action.meta.requestId
-        state.isInitialLoading = false // this is not the Initial Loading
         state.isFetchingPage = true
       })
       .addCase(fetchNextProjects.fulfilled, (state, action) => {
@@ -74,6 +73,7 @@ const projectsSlice = createSlice({
         state.currentPage = page
         state.totalCount = totalCount
         state.hasNextPage = page * state.limit < totalCount
+        state.status = 'succeeded'
         state.isFetchingPage = false
         state.activeRequestId = null
       })
@@ -82,6 +82,7 @@ const projectsSlice = createSlice({
 
         state.isFetchingPage = false
         state.activeRequestId = null
+        state.status = 'failed'
         state.error =
           (action.payload as string) ?? 'Failed to load more projects'
       })
@@ -91,8 +92,7 @@ const projectsSlice = createSlice({
 export const { resetProjects } = projectsSlice.actions
 export const selectProjects = (state: RootState) => state.projects.items
 export const selectProjectsError = (state: RootState) => state.projects.error
-export const selectProjectsIsInitialLoading = (state: RootState) =>
-  state.projects.isInitialLoading
+export const selectProjectsStatus = (state: RootState) => state.projects.status
 export const selectProjectsIsFetchingPage = (state: RootState) =>
   state.projects.isFetchingPage
 export const selectProjectsCurrentPage = (state: RootState) =>

@@ -14,7 +14,7 @@ const initialState: EpicsState = {
   limit: PROJECTS_PAGE_SIZE,
   totalCount: 0,
   hasNextPage: false,
-  isInitialLoading: false,
+  status: 'idle',
   isFetchingPage: false,
   error: null,
   activeRequestId: null, // we used it tp protect from stale responses
@@ -29,7 +29,7 @@ const projectEpicsSlice = createSlice({
       .addCase(fetchProjectEpicsPage.pending, (state, action) => {
         state.error = null
         state.activeRequestId = action.meta.requestId // save the id of this request
-        state.isInitialLoading = state.items.length === 0
+        state.status = 'loading'
         state.isFetchingPage = state.items.length > 0
       })
       .addCase(fetchProjectEpicsPage.fulfilled, (state, action) => {
@@ -42,16 +42,16 @@ const projectEpicsSlice = createSlice({
         // page=1, limit=10, total=25 -> 10 < 25 -> true
         // page=3, limit=10, total=25 -> 30 < 25 -> false
         state.hasNextPage = page * state.limit < totalCount
-        state.isInitialLoading = false
+        state.status = 'succeeded'
         state.isFetchingPage = false
         state.activeRequestId = null
       })
       .addCase(fetchProjectEpicsPage.rejected, (state, action) => {
         if (state.activeRequestId !== action.meta.requestId) return // ignore old errors
 
-        state.isInitialLoading = false
         state.isFetchingPage = false
         state.activeRequestId = null
+        state.status = 'failed'
         state.error = (action.payload as string) ?? 'Failed to load projects'
       })
       // mobile
@@ -68,6 +68,7 @@ const projectEpicsSlice = createSlice({
         state.currentPage = page
         state.totalCount = totalCount
         state.hasNextPage = page * state.limit < totalCount
+        state.status = 'succeeded'
         state.isFetchingPage = false
         state.activeRequestId = null
       })
@@ -76,6 +77,7 @@ const projectEpicsSlice = createSlice({
 
         state.isFetchingPage = false
         state.activeRequestId = null
+        state.status = 'failed'
         state.error = (action.payload as string) ?? 'Failed to load more epics'
       })
   },
@@ -83,8 +85,7 @@ const projectEpicsSlice = createSlice({
 
 export default projectEpicsSlice.reducer
 export const selectEpicsItems = (state: RootState) => state.projectEpics.items
-export const selectEpicsIsInitialLoading = (state: RootState) =>
-  state.projectEpics.isInitialLoading
+export const selectEpicsStatus = (state: RootState) => state.projectEpics.status
 export const selectEpicsIsFetchingPage = (state: RootState) =>
   state.projectEpics.isFetchingPage
 export const selectEpicsError = (state: RootState) => state.projectEpics.error
