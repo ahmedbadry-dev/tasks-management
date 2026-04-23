@@ -60,7 +60,7 @@ export const fetchNextEpicsPage = createAsyncThunk(
       const state = getState() as RootState
 
       if (
-        state.projectEpics.isInitialLoading ||
+        state.projectEpics.status === 'loading' ||
         state.projectEpics.isFetchingPage
       ) {
         return false

@@ -5,13 +5,15 @@ import {
     selectEpicsError,
     selectEpicsHasNextPage,
     selectEpicsIsFetchingPage,
-    selectEpicsIsInitialLoading,
     selectEpicsItems,
+    selectEpicsStatus,
     selectEpicsTotalCount
 } from "../store/projectEpicsSlice"
 import { useEffect, useRef } from "react"
 import { fetchNextEpicsPage } from "../store/asyncThunk/epicThunk"
 import { EpicMobileCard } from "./EpicMobileCard"
+import { ErrorState } from "@/shared/components/ErrorState"
+import { EpicsPageSkeleton } from "./EpicsPageSkeleton"
 
 export const EpicsMobileView = ({ accessToken, projectId }: { accessToken: string, projectId: string }) => {
     const dispatch = useAppDispatch()
@@ -19,7 +21,7 @@ export const EpicsMobileView = ({ accessToken, projectId }: { accessToken: strin
     const totalCount = useAppSelector(selectEpicsTotalCount)
     const hasEpics = epics.length > 0
     const hasAnyEpics = totalCount > 0
-    const isInitialLoading = useAppSelector(selectEpicsIsInitialLoading)
+    const status = useAppSelector(selectEpicsStatus)
     const isFetchingPage = useAppSelector(selectEpicsIsFetchingPage)
     const hasNextPage = useAppSelector(selectEpicsHasNextPage)
     const error = useAppSelector(selectEpicsError)
@@ -39,18 +41,22 @@ export const EpicsMobileView = ({ accessToken, projectId }: { accessToken: strin
         return () => observer.disconnect()
     }, [hasNextPage, isFetchingPage, dispatch, accessToken, projectId])
 
-    if (isInitialLoading && !hasEpics) {
+    if ((status === 'idle' || status === 'loading') && !hasEpics) {
         return (
             <div className="sm:hidden pb-10">
-                <p>InitialLoading...</p>
+                <EpicsPageSkeleton count={3} />
             </div>
         )
     }
 
-    if (error && !hasEpics) {
+    if (status === 'failed' && !hasEpics) {
         return (
-            <div className="sm:hidden pb-10">
-                <p>{error}</p>
+            <div className="md:hidden">
+                <ErrorState
+                    title="Failed to load epics"
+                    message="Please try again."
+                    onRetry={() => dispatch(fetchNextEpicsPage({ accessToken, project_id: projectId }))}
+                />
             </div>
         )
     }
@@ -67,7 +73,7 @@ export const EpicsMobileView = ({ accessToken, projectId }: { accessToken: strin
             <div ref={loaderRef} className="h-10" />
 
             {isFetchingPage && <p>Loading more...</p>}
-            {!isInitialLoading && !isFetchingPage && !hasAnyEpics && !error && (
+            {status === 'succeeded' && !isFetchingPage && !hasAnyEpics && (
                 <p>No epics yet.</p>
             )}
             {hasEpics && error && (

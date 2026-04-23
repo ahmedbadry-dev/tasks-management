@@ -2,21 +2,23 @@
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import {
     selectEpicsError,
-    selectEpicsIsInitialLoading,
     selectEpicsItems,
+    selectEpicsStatus,
     selectEpicsTotalCount
 } from '../store/projectEpicsSlice'
 import { EpicDesktopCard } from './EpicDesktopCard'
 import { useEffect } from 'react'
 import { fetchProjectEpicsPage } from '../store/asyncThunk/epicThunk'
 import { EpicsPagination } from './EpicsPagination'
+import { ErrorState } from '@/shared/components/ErrorState'
+import { EpicsPageSkeleton } from './EpicsPageSkeleton'
 
 
 export const EpicsDesktopView = ({ projectId, accessToken }: { projectId: string, accessToken: string }) => {
 
     const dispatch = useAppDispatch()
     const epics = useAppSelector(selectEpicsItems)
-    const isLoading = useAppSelector(selectEpicsIsInitialLoading)
+    const status = useAppSelector(selectEpicsStatus)
     const error = useAppSelector(selectEpicsError)
     const totalCount = useAppSelector(selectEpicsTotalCount)
     const hasEpics = epics.length > 0
@@ -26,9 +28,25 @@ export const EpicsDesktopView = ({ projectId, accessToken }: { projectId: string
         dispatch(fetchProjectEpicsPage({ accessToken: accessToken, project_id: projectId, page: 1 }))
     }, [dispatch, projectId, accessToken])
 
-    if (isLoading) return <p className="hidden sm:block">Loading...</p>
+    if ((status === 'idle' || status === 'loading') && !hasEpics) {
+        return (
+            <div className="hidden sm:block">
+                <EpicsPageSkeleton />
+            </div>
+        )
+    }
 
-    if (error) return <p className="hidden sm:block">{error}</p>
+    if (status === 'failed' && !hasEpics) {
+        return (
+            <div className="hidden md:block">
+                <ErrorState
+                    title="Failed to load epics"
+                    message={error ?? "Please try again."}
+                    onRetry={() => dispatch(fetchProjectEpicsPage({ accessToken: accessToken, project_id: projectId, page: 1 }))}
+                />
+            </div>
+        )
+    }
 
     return (
         <div>
@@ -39,7 +57,7 @@ export const EpicsDesktopView = ({ projectId, accessToken }: { projectId: string
                     ))
                 )}
             </div>
-            {!hasAnyEpics && (
+            {status === 'succeeded' && !hasAnyEpics && (
                 <p className="hidden pb-10 sm:block">No epics yet.</p>
             )}
             {hasAnyEpics && (
