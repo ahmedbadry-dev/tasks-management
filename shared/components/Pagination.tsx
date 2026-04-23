@@ -1,34 +1,25 @@
-import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import {
-    selectCurrentPage,
-    selectIsFetchingPage,
-    selectTotalPages,
-    selectTotalCount,
-    selectLimit,
-} from '@/features/projects/store/projectsSlice'
-import { fetchProjectsPage } from '@/features/projects/store/asyncThunk/projectsThunk'
 import { ArrowIcon } from './icons'
 import { PaginationBtn } from './PaginationBtn'
 
 type Props = {
-    accessToken: string
+    currentPage: number
+    totalPages: number
+    totalCount: number
+    limit: number
+    isFetchingPage: boolean
+    onPageChange: (page: number) => void
+    label?: string
 }
 
-export const Pagination = ({ accessToken }: Props) => {
-    const dispatch = useAppDispatch()
-    const currentPage = useAppSelector(selectCurrentPage)
-    const totalPages = useAppSelector(selectTotalPages)
-    const totalCount = useAppSelector(selectTotalCount)
-    const limit = useAppSelector(selectLimit)
-    const isFetchingPage = useAppSelector(selectIsFetchingPage)
-
-    const handlePageChange = (page: number) => {
-        if (page < 1 || page > totalPages || page === currentPage || isFetchingPage) {
-            return
-        }
-
-        dispatch(fetchProjectsPage({ accessToken, page }))
-    }
+export const Pagination = ({
+    currentPage,
+    totalPages,
+    totalCount,
+    limit,
+    isFetchingPage,
+    onPageChange,
+    label = 'items'
+}: Props) => {
 
     const getPageNumbers = () => {
         const pages: number[] = []
@@ -57,12 +48,10 @@ export const Pagination = ({ accessToken }: Props) => {
 
     return (
         <div className="hidden sm:flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-10">
-            <div>
-                <p className="type-body-md">
-                    Showing {from}-{to} of {totalCount} active projects
-                </p>
-            </div>
-            <nav aria-label="Projects pagination" className="self-start sm:self-auto">
+            <p className="type-body-md">
+                Showing {from}-{to} of {totalCount} {label}
+            </p>
+            <nav aria-label="Pagination" className="self-start sm:self-auto">
                 <div className="flex items-center gap-1">
 
                     {/* Previous */}
@@ -71,13 +60,16 @@ export const Pagination = ({ accessToken }: Props) => {
                         icon={<ArrowIcon size={8} />}
                         ariaLabel="Previous page"
                         disabled={currentPage === 1 || isFetchingPage}
-                        onClick={() => handlePageChange(currentPage - 1)}
+                        onClick={() => onPageChange(currentPage - 1)}
                     />
 
                     {/* Pages */}
                     {getPageNumbers().map((page, index) =>
                         page === -1 ? (
-                            <span key={`ellipsis-${index}`} className="h-8 w-8 flex items-center justify-center text-slate-400 type-label-sm">
+                            <span
+                                key={`ellipsis-${index}`}
+                                className="h-8 w-8 flex items-center justify-center text-slate-400 type-label-sm"
+                            >
                                 ...
                             </span>
                         ) : (
@@ -86,7 +78,7 @@ export const Pagination = ({ accessToken }: Props) => {
                                 pageNum={String(page)}
                                 isActive={page === currentPage}
                                 disabled={isFetchingPage || page === currentPage}
-                                onClick={() => handlePageChange(page)}
+                                onClick={() => onPageChange(page)}
                             />
                         )
                     )}
@@ -97,7 +89,7 @@ export const Pagination = ({ accessToken }: Props) => {
                         icon={<ArrowIcon className="rotate-180" size={8} />}
                         ariaLabel="Next page"
                         disabled={currentPage === totalPages || isFetchingPage}
-                        onClick={() => handlePageChange(currentPage + 1)}
+                        onClick={() => onPageChange(currentPage + 1)}
                     />
 
                 </div>
