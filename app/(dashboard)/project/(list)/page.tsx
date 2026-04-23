@@ -2,7 +2,7 @@ import { ProjectsView } from "@/features/projects/components/ProjectsView"
 
 const ProjectsPage = () => {
     return (
-        <div >
+        <div>
             <ProjectsView />
         </div>
     )

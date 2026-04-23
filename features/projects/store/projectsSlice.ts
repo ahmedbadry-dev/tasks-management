@@ -91,17 +91,18 @@ const projectsSlice = createSlice({
 export const { resetProjects } = projectsSlice.actions
 export const selectProjects = (state: RootState) => state.projects.items
 export const selectProjectsError = (state: RootState) => state.projects.error
-export const selectIsInitialLoading = (state: RootState) =>
+export const selectProjectsIsInitialLoading = (state: RootState) =>
   state.projects.isInitialLoading
-export const selectIsFetchingPage = (state: RootState) =>
+export const selectProjectsIsFetchingPage = (state: RootState) =>
   state.projects.isFetchingPage
-export const selectCurrentPage = (state: RootState) =>
+export const selectProjectsCurrentPage = (state: RootState) =>
   state.projects.currentPage
-export const selectTotalCount = (state: RootState) => state.projects.totalCount
-export const selectLimit = (state: RootState) => state.projects.limit
-export const selectTotalPages = (state: RootState) =>
+export const selectProjectsTotalCount = (state: RootState) =>
+  state.projects.totalCount
+export const selectProjectsLimit = (state: RootState) => state.projects.limit
+export const selectProjectsTotalPages = (state: RootState) =>
   Math.ceil(state.projects.totalCount / state.projects.limit)
-export const selectHasNextPage = (state: RootState) =>
+export const selectProjectsHasNextPage = (state: RootState) =>
   state.projects.hasNextPage
 
 export default projectsSlice.reducer

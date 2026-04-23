@@ -1,11 +1,11 @@
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import {
   resetProjects,
-  selectHasNextPage,
-  selectIsFetchingPage,
-  selectIsInitialLoading,
   selectProjects,
   selectProjectsError,
+  selectProjectsHasNextPage,
+  selectProjectsIsFetchingPage,
+  selectProjectsIsInitialLoading,
 } from '../store/projectsSlice'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
@@ -17,9 +17,9 @@ import { useMediaQuery } from '../hooks/useMediaQuery'
 export const useProjectList = (accessToken: string) => {
   const dispatch = useAppDispatch()
   const projects = useAppSelector(selectProjects)
-  const hasNextPage = useAppSelector(selectHasNextPage)
-  const isInitialLoading = useAppSelector(selectIsInitialLoading)
-  const isFetchingPage = useAppSelector(selectIsFetchingPage)
+  const hasNextPage = useAppSelector(selectProjectsHasNextPage)
+  const isInitialLoading = useAppSelector(selectProjectsIsInitialLoading)
+  const isFetchingPage = useAppSelector(selectProjectsIsFetchingPage)
   const error = useAppSelector(selectProjectsError)
   const loadMoreRef = useRef<HTMLDivElement | null>(null) // this ref for the sentinel element to make the infinite scroll
 
