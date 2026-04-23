@@ -38,16 +38,16 @@ export const MainContentHeader = (
                 aria-label="Create New Project"
                 className="
                     btn btn-primary
-                    max-sm:fixed max-sm:bottom-20 max-sm:right-5 max-sm:z-20
-                    max-sm:h-14 max-sm:w-14 
-                    max-sm:p-0 max-sm:shadow-[0px_4px_6px_-4px_#0000001A,0px_10px_15px_-3px_#0000001A]
-                    max-sm:flex max-sm:items-center max-sm:justify-center
+                    max-md:fixed max-md:bottom-20 max-md:right-5 max-md:z-20
+                    max-md:h-14 max-md:w-14 
+                    max-md:p-0 max-md:shadow-[0px_4px_6px_-4px_#0000001A,0px_10px_15px_-3px_#0000001A]
+                    max-md:flex max-md:items-center max-md:justify-center
                 "
             >
-                <span className="sm:mr-1">
+                <span className="md:mr-1">
                     {btnIcon}
                 </span>
-                <span className="type-body-md text-background max-sm:hidden">
+                <span className="type-body-md text-background max-md:hidden">
                     {btnText}
                 </span>
             </Link>}
