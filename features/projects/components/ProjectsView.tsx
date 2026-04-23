@@ -1,6 +1,8 @@
 import { getSession } from "@/features/auth/utils/getSession"
 import { ProjectsList } from "./ProjectsList"
 import { redirect } from "next/navigation"
+import { ProjectsDesktopView } from "./ProjectsDesktopView"
+import { ProjectsMobileView } from "./ProjectsMobileView"
 
 export const ProjectsView = async () => {
     const session = await getSession()
@@ -8,7 +10,8 @@ export const ProjectsView = async () => {
 
     return (
         <div>
-            <ProjectsList accessToken={session.accessToken} />
+            <ProjectsDesktopView accessToken={session.accessToken} />
+            <ProjectsMobileView accessToken={session.accessToken} />
         </div>
     )
 }

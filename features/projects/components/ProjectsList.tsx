@@ -7,6 +7,7 @@ import { Pagination } from '@/shared/components/Pagination'
 import { NoProject } from './NoProject'
 import { PlusIcon } from '@/shared/components/icons'
 import { useProjectList } from '../hooks/useProjectList'
+import { ProjectsPagination } from './ProjectsPagination'
 
 type ProjectsListProps = {
     accessToken: string
@@ -71,7 +72,7 @@ export const ProjectsList = ({ accessToken }: ProjectsListProps) => {
                     {isDesktop ? 'Failed to load projects page' : 'Failed to load more projects'}
                 </p>
             )}
-            {hasProjects && <Pagination accessToken={accessToken} />}
+            {hasProjects && <ProjectsPagination accessToken={accessToken} />}
         </div>
     )
 }
