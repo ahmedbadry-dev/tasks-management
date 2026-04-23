@@ -1,6 +1,8 @@
 import { env } from '@/lib/env'
 import { TEpic, TMember, TProjectEpicBody } from '../types'
 import { parseApiError } from '@/utils/parseApiError'
+import { PaginatedResponse } from '@/features/projects/types'
+import { PROJECTS_PAGE_SIZE } from '@/features/projects/constants'
 
 export const projectEpicsService = {
   addProjectEpic: async (
@@ -19,19 +21,41 @@ export const projectEpicsService = {
 
     if (!response.ok) throw await parseApiError(response)
   },
+  // getProjectEpics: async (
+  //   project_id: string,
+  //   accessToken: string
+  // ): Promise<TEpic[]> => {
+  //   const response = await fetch(
+  //     `${env.apiUrl}/rest/v1/project_epics?project_id=eq.${project_id}`,
+  //     {
+  //       method: 'GET',
+  //       headers: {
+  //         apikey: env.anonKey,
+  //         Authorization: `Bearer ${accessToken}`,
+  //         'Content-Type': 'application/json',
+  //         Prefer: 'count=exact',
+  //       },
+  //     }
+  //   )
+
+  //   if (!response.ok) throw await parseApiError(response)
+  //   return await response.json()
+  // },
   getProjectEpics: async (
-    project_id: string,
     accessToken: string,
+    page: number = 1,
+    project_id: string,
     signal?: AbortSignal
-  ): Promise<TEpic[]> => {
+  ): Promise<PaginatedResponse<TEpic>> => {
+    const offset = (page - 1) * PROJECTS_PAGE_SIZE
+
     const response = await fetch(
-      `${env.apiUrl}/rest/v1/project_epics?project_id=eq.${project_id}`,
+      `${env.apiUrl}/rest/v1/project_epics?project_id=eq.${project_id}&limit=${PROJECTS_PAGE_SIZE}&offset=${offset}`,
       {
         method: 'GET',
         headers: {
           apikey: env.anonKey,
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
           Prefer: 'count=exact',
         },
         signal,
@@ -39,7 +63,13 @@ export const projectEpicsService = {
     )
 
     if (!response.ok) throw await parseApiError(response)
-    return await response.json()
+
+    const contentRange = response.headers.get('Content-Range')
+    const totalCount = contentRange ? parseInt(contentRange.split('/')[1]) : 0
+
+    const data = await response.json()
+
+    return { data, totalCount }
   },
   getProjectMembers: async (
     project_id: string,

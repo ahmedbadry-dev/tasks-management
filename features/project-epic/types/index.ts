@@ -19,14 +19,14 @@ export type TEpic = {
 
 export type EpicsState = {
   items: TEpic[]
-  // currentPage: number
-  // totalCount: number
-  // limit: number
-  // hasNextPage: boolean
+  currentPage: number
+  totalCount: number
+  limit: number
+  hasNextPage: boolean
   isInitialLoading: boolean
-  // isFetchingPage: boolean
+  isFetchingPage: boolean
   error: string | null
-  // activeRequestId: string | null
+  activeRequestId: string | null
 }
 
 export type TProjectEpicBody = {
