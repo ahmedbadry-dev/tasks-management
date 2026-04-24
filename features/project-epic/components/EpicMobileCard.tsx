@@ -3,10 +3,24 @@ import { EpicBadge } from "./EpicBadge"
 import { MemberAvatar } from "@/features/project-members/components/MemberAvatar"
 import { TEpic } from "../types"
 import { formatServerDateTime } from "@/features/projects/utils/formatServerDateTime"
+import { useAppDispatch } from "@/store/hooks"
+import { openModal } from "@/store/uiStore/uiSlice"
 
-export const EpicMobileCard = ({ epic_id, title, description, deadline, assignee }: TEpic) => {
+
+export const EpicMobileCard = ({ id, project_id, epic_id, title, description, deadline, assignee }: TEpic) => {
+
+    const dispatch = useAppDispatch()
+
+    const handleClick = () => {
+        dispatch(openModal({
+            modalType: 'EPIC_DETAILS',
+            payload: { epicId: id, projectId: project_id },
+        }))
+    }
     return (
-        <div className="flex flex-col gap-4 rounded-lg bg-white p-4 shadow-[0px_1px_2px_0px_#0000000D]">
+        <div
+            onClick={handleClick}
+            className="flex flex-col gap-4 rounded-lg bg-white p-4 shadow-[0px_1px_2px_0px_#0000000D]">
             {/* card header */}
             <div className="flex justify-between ">
                 <div className="flex items-center gap-4">

@@ -10,6 +10,13 @@ type fetchProjectsPageArgs = {
   project_id: string
 }
 
+type FetchEpicDetailsArgs = {
+  accessToken: string
+  epic_id: string
+  project_id: string
+  force?: boolean
+}
+
 export const fetchProjectEpicsPage = createAsyncThunk(
   'epics/fetchProjectEpicsPage',
   async (
@@ -67,6 +74,38 @@ export const fetchNextEpicsPage = createAsyncThunk(
       }
 
       return state.projectEpics.hasNextPage
+    },
+  }
+)
+
+export const fetchEpicDetails = createAsyncThunk(
+  'epics/fetchEpicDetails',
+  async (
+    { accessToken, epic_id, project_id }: FetchEpicDetailsArgs,
+    { rejectWithValue, signal }
+  ) => {
+    try {
+      const data = await projectEpicsService.getEpicDetails(
+        accessToken,
+        epic_id,
+        project_id,
+        signal
+      )
+      return { epic_id, data }
+    } catch (error) {
+      return rejectWithValue(parseError(error))
+    }
+  },
+  {
+    condition: ({ epic_id, force = false }, { getState }) => {
+      if (force) return true
+      const state = getState() as RootState
+      const status = state.projectEpics.detailsStatusById[epic_id]
+      const hasCachedData = Boolean(state.projectEpics.detailsById[epic_id])
+
+      if (status === 'loading') return false
+      if (hasCachedData) return false
+      return true
     },
   }
 )

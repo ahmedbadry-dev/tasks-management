@@ -1,3 +1,5 @@
+export type RequestStatus = 'idle' | 'loading' | 'succeeded' | 'failed'
+
 export type TUser = {
   sub: string
   name: string
@@ -16,6 +18,7 @@ export type TEpic = {
   created_by: TUser
   assignee: TUser | null
 }
+export type TEpicDetails = TEpic
 
 export type EpicsState = {
   items: TEpic[]
@@ -23,10 +26,15 @@ export type EpicsState = {
   totalCount: number
   limit: number
   hasNextPage: boolean
-  status: 'idle' | 'loading' | 'succeeded' | 'failed'
+  status: RequestStatus
   isFetchingPage: boolean
   error: string | null
   activeRequestId: string | null
+
+  detailsById: Record<string, TEpicDetails>
+  detailsStatusById: Record<string, RequestStatus>
+  detailsErrorById: Record<string, string | null>
+  detailsRequestIdById: Record<string, string | null>
 }
 
 export type TProjectEpicBody = {
