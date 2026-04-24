@@ -23,7 +23,6 @@ export const ProjectCard = ({ id, name, description, created_at }: TProject) => 
                         </h1>
                         <button
                             onClick={handleEditClick}
-                            className="bg-amber-400"
                         >
                             edit
                         </button>

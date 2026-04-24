@@ -3,6 +3,7 @@ import { EpicsState } from '../types'
 
 import { RootState } from '@/store'
 import {
+  fetchEpicDetails,
   fetchNextEpicsPage,
   fetchProjectEpicsPage,
 } from './asyncThunk/epicThunk'
@@ -18,6 +19,11 @@ const initialState: EpicsState = {
   isFetchingPage: false,
   error: null,
   activeRequestId: null, // we used it tp protect from stale responses
+
+  detailsById: {},
+  detailsStatusById: {},
+  detailsErrorById: {},
+  detailsRequestIdById: {},
 }
 
 const projectEpicsSlice = createSlice({
@@ -80,6 +86,32 @@ const projectEpicsSlice = createSlice({
         state.status = 'failed'
         state.error = (action.payload as string) ?? 'Failed to load more epics'
       })
+      // epics details
+      .addCase(fetchEpicDetails.pending, (state, action) => {
+        const epic_id = action.meta.arg.epic_id
+        state.detailsStatusById[epic_id] = 'loading'
+        state.detailsErrorById[epic_id] = null
+        state.detailsRequestIdById[epic_id] = action.meta.requestId
+      })
+      .addCase(fetchEpicDetails.fulfilled, (state, action) => {
+        const { epic_id, data } = action.payload
+        const reqId = state.detailsRequestIdById[epic_id]
+        if (reqId !== action.meta.requestId) return
+
+        state.detailsById[epic_id] = data
+        state.detailsStatusById[epic_id] = 'succeeded'
+        state.detailsRequestIdById[epic_id] = null
+      })
+      .addCase(fetchEpicDetails.rejected, (state, action) => {
+        const epic_id = action.meta.arg.epic_id
+        const reqId = state.detailsRequestIdById[epic_id]
+        if (reqId !== action.meta.requestId) return
+
+        state.detailsStatusById[epic_id] = 'failed'
+        state.detailsErrorById[epic_id] =
+          (action.payload as string) ?? 'Failed to load epic details'
+        state.detailsRequestIdById[epic_id] = null
+      })
   },
 })
 
@@ -99,3 +131,18 @@ export const selectEpicsTotalPages = (state: RootState) =>
 
 export const selectEpicsHasNextPage = (state: RootState) =>
   state.projectEpics.hasNextPage
+export const selectEpicDetailsById = (
+  state: RootState,
+  epicId?: string | null
+) => (epicId ? (state.projectEpics.detailsById[epicId] ?? null) : null)
+
+export const selectEpicDetailsStatusById = (
+  state: RootState,
+  epicId?: string | null
+) =>
+  epicId ? (state.projectEpics.detailsStatusById[epicId] ?? 'idle') : 'idle'
+
+export const selectEpicDetailsErrorById = (
+  state: RootState,
+  epicId?: string | null
+) => (epicId ? (state.projectEpics.detailsErrorById[epicId] ?? null) : null)

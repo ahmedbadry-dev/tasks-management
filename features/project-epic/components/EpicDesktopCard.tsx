@@ -3,10 +3,23 @@ import { EpicBadge } from "./EpicBadge"
 import { EpicMemberIdentity } from "./EpicMemberIdentity"
 import { TEpic } from "../types"
 import { formatServerDateTime } from "@/features/projects/utils/formatServerDateTime"
+import { useAppDispatch } from "@/store/hooks"
+import { openModal } from "@/store/uiStore/uiSlice"
 
-export const EpicDesktopCard = ({ title, assignee, created_at, created_by, epic_id }: TEpic) => {
+
+export const EpicDesktopCard = ({ id, project_id, title, assignee, created_at, created_by, epic_id }: TEpic) => {
+    const dispatch = useAppDispatch()
+
+    const handleClick = () => {
+        dispatch(openModal({
+            modalType: 'EPIC_DETAILS',
+            payload: { epicId: id, projectId: project_id },
+        }))
+    }
+
     return (
         <div
+            onClick={handleClick}
             className="w-full min-w-0 flex flex-col gap-5 rounded-lg border-l-4 border-dark-green bg-white p-4 shadow-[0px_1px_2px_0px_#0000000D]">
             {/* card header */}
             <div className="flex justify-between">

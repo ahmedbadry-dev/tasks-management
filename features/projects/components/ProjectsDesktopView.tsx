@@ -57,7 +57,7 @@ export const ProjectsDesktopView = ({ accessToken }: { accessToken: string }) =>
     return (
         <div className={
             cn(`hidden md:flex min-h-0 flex-col pb-24 md:pb-0 `,
-                hasProjects ? 'gap-10' : 'flex items-center py-20'
+                hasProjects ? '' : 'flex items-center py-20'
             )}
         >
             {hasProjects && (

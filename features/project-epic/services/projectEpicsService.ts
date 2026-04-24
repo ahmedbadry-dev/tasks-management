@@ -1,5 +1,5 @@
 import { env } from '@/lib/env'
-import { TEpic, TMember, TProjectEpicBody } from '../types'
+import { TEpic, TEpicDetails, TMember, TProjectEpicBody } from '../types'
 import { parseApiError } from '@/utils/parseApiError'
 import { PaginatedResponse } from '@/features/projects/types'
 import { PROJECTS_PAGE_SIZE } from '@/features/projects/constants'
@@ -91,5 +91,32 @@ export const projectEpicsService = {
 
     if (!response.ok) throw await parseApiError(response)
     return await response.json()
+  },
+  getEpicDetails: async (
+    accessToken: string,
+    epic_id: string,
+    project_id: string,
+    signal?: AbortSignal
+  ): Promise<TEpicDetails> => {
+    const response = await fetch(
+      `${env.apiUrl}/rest/v1/project_epics?project_id=eq.${project_id}&id=eq.${epic_id}`,
+      {
+        method: 'GET',
+        headers: {
+          apikey: env.anonKey,
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        signal,
+      }
+    )
+
+    if (!response.ok) throw await parseApiError(response)
+
+    const data = await response.json()
+    const row = Array.isArray(data) ? data[0] : data
+    if (!row) throw new Error('Epic details not found')
+
+    return row as TEpicDetails
   },
 }

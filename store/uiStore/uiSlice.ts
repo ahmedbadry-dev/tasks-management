@@ -1,36 +1,32 @@
-// import { createSlice } from '@reduxjs/toolkit'
-// import { RootState } from '..'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import type { RootState } from '@/store'
+import { OpenModalPayload, UiModalState } from '@/types/modal'
 
-// type UiState = {
-//   isCollapsed: boolean
-//   isMobileOpen: boolean
-// }
+const initialState: UiModalState = {
+  isOpen: false,
+  modalType: null,
+  payload: null,
+}
 
-// const initialState: UiState = {
-//   isCollapsed: false,
-//   isMobileOpen: false,
-// }
+const uiSlice = createSlice({
+  name: 'ui',
+  initialState,
+  reducers: {
+    openModal: (state, action: PayloadAction<OpenModalPayload>) => {
+      state.isOpen = true
+      state.modalType = action.payload.modalType
+      state.payload = action.payload.payload
+    },
+    closeModal: (state) => {
+      state.isOpen = false
+      state.modalType = null
+      state.payload = null
+    },
+  },
+})
 
-// const uiSlice = createSlice({
-//   name: 'ui',
-//   initialState,
-//   reducers: {
-//     toggleCollapse: (state) => {
-//       state.isCollapsed = !state.isCollapsed
-//     },
-//     toggleMobile: (state) => {
-//       state.isMobileOpen = !state.isMobileOpen
-//     },
-//     closeMobile: (state) => {
-//       state.isMobileOpen = false
-//     },
-//   },
-// })
-
-// export const selectIsCollapsed = (state: RootState) => state.ui.isCollapsed
-// export const selectIsMobileOpen = (state: RootState) => state.ui.isMobileOpen
-
-// export const { toggleCollapse, toggleMobile, closeMobile } = uiSlice.actions
-// export default uiSlice.reducer
-
-// why i should put it heeeeeeeeeeeeeer ????
+export const { openModal, closeModal } = uiSlice.actions
+export const selectIsModalOpen = (state: RootState) => state.ui.isOpen
+export const selectModalType = (state: RootState) => state.ui.modalType
+export const selectModalPayload = (state: RootState) => state.ui.payload
+export default uiSlice.reducer

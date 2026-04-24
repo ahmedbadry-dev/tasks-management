@@ -24,7 +24,7 @@ export const ProjectMembersView = async ({ projectId }: ProjectMembersViewProps)
                 href={'#'}
             />
             {/* desktop view */}
-            <div className="hidden md:flex justify-center pt-10">
+            <div className="hidden md:flex justify-center">
                 <MembersDesktopTable data={result} />
             </div>
             <div className="flex justify-center pt-5 md:hidden ">
