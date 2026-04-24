@@ -4,13 +4,11 @@ import { parseError } from '@/utils/parseError'
 import { authService } from '../services/authService'
 import { setAuthCookies } from '../utils/setAuthCookies'
 import { TSignInSchema } from '../validations/SignInSchema'
-import { redirect } from 'next/navigation'
-
-type SignInActionResult = { success: boolean; error: string } | void
+import { ActionResult } from '@/shared/types/action-result'
 
 export const signInAction = async (
   data: TSignInSchema
-): Promise<SignInActionResult> => {
+): Promise<ActionResult> => {
   try {
     const response = await authService.signIn({
       email: data.email,
@@ -20,8 +18,8 @@ export const signInAction = async (
     // add tokens to HttpOnly Cookies store
     await setAuthCookies(response, data.rememberMe)
   } catch (error) {
-    return { success: false, error: parseError(error) }
+    return { ok: false, error: parseError(error) }
   }
 
-  redirect('/project')
+  return { ok: true }
 }

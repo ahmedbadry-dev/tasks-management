@@ -10,6 +10,7 @@ import { Textarea } from '@/shared/components/Textarea';
 import { useState } from 'react';
 import { addProjectAction } from '../actions/addProjectAction';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 
 
@@ -56,7 +57,11 @@ export const AddProjectForm = () => {
         })
 
 
-        if (result?.success === false) {
+        if (result.ok) {
+            toast.success('Project created successfully!')
+            router.push('/project')
+        } else {
+            toast.error(result.error)
             setError('root', { message: result.error })
         }
     }

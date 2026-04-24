@@ -62,7 +62,8 @@ export const EpicsDesktopView = ({ projectId, accessToken }: { projectId: string
                             btnIcon={<PlusIcon />}
                             btnText="New Epic"
                             title="Project Epics"
-                            href="project/add"
+                            // project/3563e7c0-602a-4fc8-bd92-69b6cfb946fa/epics/new
+                            href={`/project/${projectId}/epics/new`}
                             search={true}
                         />
                     </div>
