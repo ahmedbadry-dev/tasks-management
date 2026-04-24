@@ -14,6 +14,10 @@ import { fetchNextEpicsPage } from "../store/asyncThunk/epicThunk"
 import { EpicMobileCard } from "./EpicMobileCard"
 import { ErrorState } from "@/shared/components/ErrorState"
 import { EpicsPageSkeleton } from "./EpicsPageSkeleton"
+import { NoEpics } from "./NoEpics"
+import { TEpic } from "../types"
+
+
 
 export const EpicsMobileView = ({ accessToken, projectId }: { accessToken: string, projectId: string }) => {
     const dispatch = useAppDispatch()
@@ -70,11 +74,13 @@ export const EpicsMobileView = ({ accessToken, projectId }: { accessToken: strin
             )}
 
             {/* trigger element */}
-            <div ref={loaderRef} className="h-10" />
+            {hasAnyEpics && hasNextPage && <div ref={loaderRef} className="h-10" />}
 
             {isFetchingPage && <p>Loading more...</p>}
             {status === 'succeeded' && !isFetchingPage && !hasAnyEpics && (
-                <p>No epics yet.</p>
+                <div className=" pb-10 md:hidden">
+                    <NoEpics />
+                </div>
             )}
             {hasEpics && error && (
                 <p>Failed to load more epics</p>

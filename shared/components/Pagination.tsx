@@ -47,7 +47,7 @@ export const Pagination = ({
     const to = Math.min(currentPage * limit, totalCount)
 
     return (
-        <div className="hidden sm:flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-10">
+        <div className="hidden sm:flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between py-10">
             <p className="type-body-md">
                 Showing {from}-{to} of {totalCount} {label}
             </p>
