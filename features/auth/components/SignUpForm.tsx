@@ -7,11 +7,14 @@ import { SignUpSchema, TSignUpSchema } from "../validations/SignUpSchema"
 import { signUpAction } from "../actions/signUpAction";
 import Link from "next/link";
 import { PasswordRequirements } from "./PasswordRequirements";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 // import { Loader2 } from "lucide-react"
 
 
 export const SignUpForm = () => {
+    const router = useRouter()
 
     const { register, handleSubmit, formState: { errors, isSubmitting }, setError, watch } = useForm<TSignUpSchema>({
         resolver: zodResolver(SignUpSchema),
@@ -30,7 +33,11 @@ export const SignUpForm = () => {
     const onSubmit: SubmitHandler<TSignUpSchema> = async (data) => {
         const result = await signUpAction(data)
 
-        if (result?.error) {
+        if (result.ok) {
+            toast.success('Account created successfully!')
+            router.push('/project')
+        } else {
+            toast.error(result.error)
             setError("root", { message: result.error })
         }
     }

@@ -7,12 +7,15 @@ import { SignInSchema, TSignInSchema } from '../validations/SignInSchema'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { signInAction } from '../actions/signInAction';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 
 
 
 
 export const SignInForm = () => {
+    const router = useRouter()
 
     const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<TSignInSchema>({
         resolver: zodResolver(SignInSchema),
@@ -28,7 +31,11 @@ export const SignInForm = () => {
     const onSubmit: SubmitHandler<TSignInSchema> = async (data) => {
         const result = await signInAction(data)
 
-        if (result?.error) {
+        if (result.ok) {
+            toast.success('Welcome back!')
+            router.push('/project')
+        } else {
+            toast.error(result.error)
             setError('root', { message: result.error })
         }
     }
