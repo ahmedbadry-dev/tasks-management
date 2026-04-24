@@ -6,12 +6,11 @@ import { parseError } from '@/utils/parseError'
 import { TAddProjectBody } from '../types'
 import { projectService } from '../services/projectService'
 import { AddProjectFormSchema } from '../validations/AddProjectFormSchema'
-
-type AddProjectResult = { success: false; error: string } | void
+import { ActionResult } from '@/shared/types/action-result'
 
 export const addProjectAction = async (
   body: TAddProjectBody
-): Promise<AddProjectResult> => {
+): Promise<ActionResult> => {
   const session = await getSession()
   if (!session) redirect('/sign-in')
 
@@ -24,7 +23,7 @@ export const addProjectAction = async (
   if (!parsedBody.success) {
     const firstIssue = parsedBody.error.issues[0]
     return {
-      success: false,
+      ok: false,
       error: firstIssue?.message ?? 'Invalid project data',
     }
   }
@@ -37,8 +36,8 @@ export const addProjectAction = async (
   try {
     await projectService.addProject(normalizedBody, session.accessToken)
   } catch (error) {
-    return { success: false, error: parseError(error) }
+    return { ok: false, error: parseError(error) }
   }
 
-  redirect('/project')
+  return { ok: true }
 }

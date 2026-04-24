@@ -11,6 +11,7 @@ import { Select } from '@/shared/components/Select';
 import { AddProjectEpicSchema, TAddProjectEpicSchema } from '../validations/AddProjectEpicSchema';
 import { addProjectEpicAction } from '../actions/addProjectEpicAction';
 import { TMember } from '../types';
+import { toast } from 'sonner';
 
 type TAddProjectEpicFormProps = {
     projectId: string
@@ -47,9 +48,11 @@ export const AddProjectEpicForm = ({ members = [], projectId }: TAddProjectEpicF
             deadline: data.deadline,
         })
 
-        if (result.success) {
+        if (result.ok) {
+            toast.success('Epic created successfully!')
             router.push(`/project/${projectId}/epics`)
         } else {
+            toast.error(result.error)
             setError('root', { message: result.error })
         }
     }

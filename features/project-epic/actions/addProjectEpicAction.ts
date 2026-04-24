@@ -5,21 +5,18 @@ import { projectEpicsService } from '../services/projectEpicsService'
 import { TProjectEpicBody } from '../types'
 import { redirect } from 'next/navigation'
 import { parseError } from '@/utils/parseError'
-
-type AddProjectEpicResult =
-  | { success: true }
-  | { success: false; error: string }
+import { ActionResult } from '@/shared/types/action-result'
 
 export const addProjectEpicAction = async (
   data: TProjectEpicBody
-): Promise<AddProjectEpicResult> => {
+): Promise<ActionResult> => {
   const session = await getSession()
-  if (!session) redirect('/sign-up')
+  if (!session) redirect('/sign-in')
 
   try {
     await projectEpicsService.addProjectEpic(data, session.accessToken)
-    return { success: true }
+    return { ok: true }
   } catch (error) {
-    return { success: false, error: parseError(error) }
+    return { ok: false, error: parseError(error) }
   }
 }
