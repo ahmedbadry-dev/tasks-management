@@ -7,6 +7,7 @@ type PaginationBtnProps = {
     isActive?: boolean
     disabled?: boolean
     ariaLabel?: string
+    onClick?: () => void
 }
 
 export const PaginationBtn = ({
@@ -16,6 +17,7 @@ export const PaginationBtn = ({
     isActive = false,
     disabled = false,
     ariaLabel,
+    onClick
 }: PaginationBtnProps) => {
     return (
         <button
@@ -23,6 +25,7 @@ export const PaginationBtn = ({
             aria-label={ariaLabel}
             aria-current={isActive ? "page" : undefined}
             disabled={disabled}
+            onClick={onClick}
             className={clsx(
                 "h-8 w-8 rounded-xs border flex items-center justify-center transition-colors",
                 "disabled:cursor-not-allowed disabled:opacity-50",

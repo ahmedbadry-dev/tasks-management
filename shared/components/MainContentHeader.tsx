@@ -1,54 +1,69 @@
 
 
-import clsx from "clsx"
+import { cn } from "@/utils/cn"
 import Link from "next/link"
+import { SearchInput } from "./SearchInput"
 
 
 
 type MainContentHeaderProps = {
     title: string,
+    search?: boolean
     msg?: string,
-    btnText: string,
-    hidden?: boolean
+    btnText?: string,
     btnIcon?: React.ReactNode
+    href?: string
+    className?: string
 }
 
 
 
 export const MainContentHeader = (
     {
+        search,
         btnIcon,
         btnText,
         msg,
         title,
-        hidden
+        href,
+        className
     }: MainContentHeaderProps
 ) => {
 
     return (
-        <header className={clsx(" p-2 flex justify-between items-center", hidden && "hidden")}>
+        <header className={cn("flex justify-between items-center p-2 md:mb-8", className)}>
             <div>
                 <h1 className="heading-1">{title}</h1>
                 <p className="type-body-md">{msg}</p>
             </div>
-            <Link
-                href={'project/add'}
-                aria-label="Create New Project"
-                className="
+            {href && (
+                <div className="flex gap-5">
+                    {
+                        search && (
+                            <SearchInput />
+                        )
+                    }
+                    <Link
+                        href={href}
+                        aria-label="Create New Project"
+                        className="
                     btn btn-primary
-                    max-sm:fixed max-sm:bottom-20 max-sm:right-5 max-sm:z-20
-                    max-sm:h-14 max-sm:w-14 
-                    max-sm:p-0 max-sm:shadow-[0px_4px_6px_-4px_#0000001A,0px_10px_15px_-3px_#0000001A]
-                    max-sm:flex max-sm:items-center max-sm:justify-center
+                    max-md:fixed max-md:bottom-20 max-md:right-5 max-md:z-20
+                    max-md:h-14 max-md:w-14 
+                    max-md:p-0 max-md:shadow-[0px_4px_6px_-4px_#0000001A,0px_10px_15px_-3px_#0000001A]
+                    max-md:flex max-md:items-center max-md:justify-center
                 "
-            >
-                <span className="sm:mr-1">
-                    {btnIcon}
-                </span>
-                <span className="type-body-md text-background max-sm:hidden">
-                    {btnText}
-                </span>
-            </Link>
+                    >
+                        <span className="md:mr-1">
+                            {btnIcon}
+                        </span>
+                        <span className="type-body-md text-background max-md:hidden">
+                            {btnText}
+                        </span>
+                    </Link>
+                </div>
+            )
+            }
         </header>
     )
 }

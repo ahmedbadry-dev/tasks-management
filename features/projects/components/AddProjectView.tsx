@@ -1,6 +1,6 @@
 import { MainContentHeader } from "@/shared/components/MainContentHeader"
 import { AddProjectForm } from "./AddProjectForm"
-import { AddUserIcon, InviteUserIcon } from "@/shared/components/icons"
+import { InviteUserIcon } from "@/shared/components/icons"
 
 export const AddProjectView = () => {
     return (
@@ -9,9 +9,9 @@ export const AddProjectView = () => {
                 btnText="Invite Member"
                 title="Add New Project"
                 btnIcon={<InviteUserIcon />}
-                hidden={true}
+                href="#"
             />
-            <div className=" flex justify-center  pt-10">
+            <div className=" flex justify-center pt-5 sm:pt-10">
                 <AddProjectForm />
             </div>
         </div>

@@ -1,12 +1,14 @@
 'use client'
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { useParams, usePathname } from "next/navigation"
 import clsx from "clsx"
-import { navLinks } from "@/shared/config/nav"
+import { getNavLinks } from "@/shared/config/nav"
 import { ArrowLeftIcon, LogoutIcon } from "@/shared/components/icons"
 import { isActive } from "@/utils/isActive"
-import { startTransition, useTransition } from "react"
+import { useTransition } from "react"
 import { signOutAction } from "@/features/auth/actions/signOutAction"
+import { useAppDispatch } from "@/store/hooks"
+import { clearUser } from "@/store/userStore/userSlice"
 
 type Props = {
     isCollapsed: boolean
@@ -17,9 +19,9 @@ type Props = {
 
 export const Sidebar = ({ isCollapsed, isMobileOpen, onToggleCollapse }: Props) => {
     const pathname = usePathname()
+    const { projectId } = useParams<{ projectId: string }>()
     const hideLabels = isCollapsed && !isMobileOpen
-
-
+    const links = getNavLinks(projectId)
 
     return (
         <aside className={clsx(
@@ -30,7 +32,7 @@ export const Sidebar = ({ isCollapsed, isMobileOpen, onToggleCollapse }: Props) 
         )}>
             <nav className="flex-1 px-2 py-3">
                 <ul className="space-y-1">
-                    {navLinks.map((item) => (
+                    {links.map((item) => (
                         <li key={item.label}>
                             <Link
                                 href={item.href}
@@ -64,12 +66,12 @@ const SidebarFooter = ({ isCollapsed, hideLabels, onToggleCollapse }: {
     onToggleCollapse: () => void
 }) => {
     const [isPending, startTransition] = useTransition()
-    //   const dispatch = useAppDispatch()
+    const dispatch = useAppDispatch()
 
 
     const handleLogout = () => {
         startTransition(async () => {
-            // dispatch(clearUser()) 
+            dispatch(clearUser())
             await signOutAction()
         })
     }

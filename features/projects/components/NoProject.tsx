@@ -1,4 +1,6 @@
+
 import { NoProjectsIcon, PlusIcon } from "@/shared/components/icons"
+import Link from "next/link"
 
 export const NoProject = () => {
     return (
@@ -9,8 +11,8 @@ export const NoProject = () => {
             <div className="max-w-2xl space-y-3 flex flex-col gap-5">
                 <h1 className="heading-2">No Projects</h1>
                 <p className="type-body-md max-w-lg">You don't have any projects yet. Start by defining your first architectural workspace to begin tracking tasks and epics.</p>
-                <button
-                    type="button"
+                <Link
+                    href={'project/add'}
                     aria-label="Create New Project"
                     className="
                         btn btn-primary
@@ -18,6 +20,7 @@ export const NoProject = () => {
                         mx-auto
                         shadow-[0px_25px_50px_-12px_#003D9B4D]
                     "
+
                 >
                     <span className="sm:mr-1">
                         <PlusIcon />
@@ -25,7 +28,7 @@ export const NoProject = () => {
                     <span className="type-body-md text-background ">
                         Create New Project
                     </span>
-                </button>
+                </Link>
             </div>
         </section>
     )
