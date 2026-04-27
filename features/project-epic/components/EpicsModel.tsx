@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useMemo } from 'react'
+import { useEffect, useId } from 'react'
 import {
     CalendarIcon,
     CloseIcon,
@@ -9,16 +9,9 @@ import {
     PlusIcon,
 } from '@/shared/components/icons'
 import { MemberAvatar } from '@/features/project-members/components/MemberAvatar'
-import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { formatServerDateTime } from '@/features/projects/utils/formatServerDateTime'
 import { EpicsModelSkeleton } from './EpicsModelSkeleton'
-import {
-    selectEpicDetailsById,
-    selectEpicDetailsErrorById,
-    selectEpicDetailsStatusById,
-    selectEpicsItems,
-} from '../store/projectEpicsSlice'
-import { fetchEpicDetails } from '../store/asyncThunk/epicThunk'
+import { useEpicDetails } from '../hooks/useEpicDetails'
 
 type Props = {
     isOpen: boolean
@@ -35,26 +28,23 @@ export const EpicsModel = ({
     accessToken,
     onClose,
 }: Props) => {
-    const dispatch = useAppDispatch()
     const dialogTitleId = useId()
-    const epics = useAppSelector(selectEpicsItems)
-    const epicDetails = useAppSelector((state) => selectEpicDetailsById(state, epicId))
-    const epicDetailsStatus = useAppSelector((state) =>
-        selectEpicDetailsStatusById(state, epicId)
-    )
-    const epicDetailsError = useAppSelector((state) =>
-        selectEpicDetailsErrorById(state, epicId)
-    )
+    const {
+        epicDetails,
+        status: epicDetailsStatus,
+        error: epicDetailsError,
+        isInitialLoading,
+        hasInitialError,
+        isRefreshing,
+        retry,
+    } = useEpicDetails({
+        isOpen,
+        epicId,
+        projectId,
+        accessToken,
+    })
 
-    const fallbackEpic = useMemo(
-        () => epics.find((epic) => epic.id === epicId) ?? null,
-        [epics, epicId]
-    )
-
-    const selectedEpic = epicDetails ?? fallbackEpic
-    const isInitialLoading = epicDetailsStatus === 'loading' && !selectedEpic
-    const hasInitialError = epicDetailsStatus === 'failed' && !selectedEpic
-    const isRefreshing = epicDetailsStatus === 'loading' && Boolean(selectedEpic)
+    const selectedEpic = epicDetails
 
     const createdByName = selectedEpic?.created_by?.name ?? '-'
     const assigneeName = selectedEpic?.assignee?.name ?? '-'
@@ -66,33 +56,10 @@ export const EpicsModel = ({
         ? formatServerDateTime(selectedEpic.created_at).date
         : '-'
 
-    const retryFetch = () => {
-        if (!epicId || !projectId) return
-        dispatch(
-            fetchEpicDetails({
-                accessToken,
-                epic_id: epicId,
-                project_id: projectId,
-                force: true,
-            })
-        )
-    }
-
-    useEffect(() => {
-        if (!isOpen || !epicId || !projectId) return
-
-        dispatch(
-            fetchEpicDetails({
-                accessToken,
-                epic_id: epicId,
-                project_id: projectId,
-            })
-        )
-    }, [dispatch, isOpen, accessToken, epicId, projectId])
-
     useEffect(() => {
         if (!isOpen) return
 
+        // Lock background scroll while the modal is open.
         const previousOverflow = document.body.style.overflow
         document.body.style.overflow = 'hidden'
 
@@ -160,7 +127,7 @@ export const EpicsModel = ({
                             </p>
                             <button
                                 type="button"
-                                onClick={retryFetch}
+                                onClick={retry}
                                 className="btn btn-primary py-2 px-4"
                             >
                                 Retry
@@ -184,7 +151,7 @@ export const EpicsModel = ({
                                     </p>
                                     <button
                                         type="button"
-                                        onClick={retryFetch}
+                                        onClick={retry}
                                         className="btn btn-ghost text-primary py-1 px-2"
                                     >
                                         Retry

@@ -1,11 +1,12 @@
 import { AddCircleIcon } from '@/shared/components/icons'
 import Link from 'next/link'
+import { routes } from '@/lib/routes'
 
 
 export const AddProjectCard = () => {
     return (
         <Link
-            href={'project/add'}
+            href={routes.project.add}
             className='h-55 rounded-lg bg-white p-6 flex flex-col justify-center items-center cursor-pointer'
         >
             <span className='flex justify-center items-center h-12 w-12 bg-surface-low rounded-xl'><AddCircleIcon /></span>

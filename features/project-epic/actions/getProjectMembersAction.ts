@@ -5,6 +5,7 @@ import { projectEpicsService } from '../services/projectEpicsService'
 import { TEpic, TMember } from '../types'
 import { redirect } from 'next/navigation'
 import { parseError } from '@/utils/parseError'
+import { routes } from '@/lib/routes'
 
 type GetProjectMembersActionResult =
   | { success: true; data: TMember[] }
@@ -15,7 +16,7 @@ export const getProjectMembersAction = async (
   signal?: AbortSignal
 ): Promise<GetProjectMembersActionResult> => {
   const session = await getSession()
-  if (!session) redirect('/sign-up')
+  if (!session) redirect(routes.auth.signUp)
 
   try {
     const response = await projectEpicsService.getProjectMembers(

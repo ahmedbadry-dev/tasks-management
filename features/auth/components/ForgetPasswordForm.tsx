@@ -9,6 +9,7 @@ import { ArrowLeftIcon, CheckCircleIcon, TimerIcon } from '@/shared/components/i
 import { forgotPasswordAction } from '../actions/forgotPasswordAction';
 import Link from 'next/link';
 import clsx from 'clsx';
+import { routes } from '@/lib/routes';
 
 const RESEND_TRIALS_KEY = 'forgot_password_resend_trials'
 const RESEND_TIMER_KEY = 'forgot_password_resend_timer_end'
@@ -160,7 +161,7 @@ export const ForgetPasswordForm = () => {
                     </button>
 
                     <Link
-                        href='/sign-in'
+                        href={routes.auth.signIn}
                         className="btn btn-ghost w-full py-6 flex justify-center items-center gap-2"
                     >
                         <ArrowLeftIcon size={12} className='text-primary' />

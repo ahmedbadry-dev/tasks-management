@@ -3,6 +3,7 @@ import { TProjectMember } from '../types'
 import { redirect } from 'next/navigation'
 import { projectMembersService } from '../services/projectMembersService'
 import { parseError } from '@/utils/parseError'
+import { routes } from '@/lib/routes'
 
 type getProjectMembersActionResult =
   | { success: true; data: TProjectMember[] }
@@ -12,7 +13,7 @@ export const getProjectMembersAction = async (
   project_id: string
 ): Promise<getProjectMembersActionResult> => {
   const session = await getSession()
-  if (!session) redirect('/sign-in')
+  if (!session) redirect(routes.auth.signIn)
 
   try {
     const response = await projectMembersService.getProjectMembers(
