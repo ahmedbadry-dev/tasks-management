@@ -11,18 +11,6 @@ export type TAddProjectBody = {
   description: string | null
 }
 
-export type ProjectsState = {
-  items: TProject[]
-  currentPage: number
-  totalCount: number
-  limit: number
-  hasNextPage: boolean
-  status: 'idle' | 'loading' | 'succeeded' | 'failed'
-  isFetchingPage: boolean
-  error: string | null
-  activeRequestId: string | null
-}
-
 export type PaginatedResponse<T> = {
   data: T[]
   totalCount: number

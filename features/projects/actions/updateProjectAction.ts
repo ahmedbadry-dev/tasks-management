@@ -7,13 +7,14 @@ import { TAddProjectBody } from '../types'
 import { projectService } from '../services/projectService'
 import { UpdateProjectFormSchema } from '../validations/UpdateProjectFormSchema'
 import { ActionResult } from '@/shared/types/action-result'
+import { routes } from '@/lib/routes'
 
 export const updateProjectAction = async (
   project_id: string,
   body: TAddProjectBody
 ): Promise<ActionResult> => {
   const session = await getSession()
-  if (!session) redirect('/sign-in')
+  if (!session) redirect(routes.auth.signIn)
 
   const schemaInput = {
     name: body.name,

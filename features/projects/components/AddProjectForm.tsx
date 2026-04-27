@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { addProjectAction } from '../actions/addProjectAction';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { routes } from '@/lib/routes';
 
 
 
@@ -59,7 +60,7 @@ export const AddProjectForm = () => {
 
         if (result.ok) {
             toast.success('Project created successfully!')
-            router.push('/project')
+            router.push(routes.project.list)
         } else {
             toast.error(result.error)
             setError('root', { message: result.error })

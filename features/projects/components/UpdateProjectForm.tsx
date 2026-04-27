@@ -13,6 +13,7 @@ import { updateProjectAction } from '../actions/updateProjectAction';
 import { TProject } from '../types';
 import { TUpdateProjectFormSchema, UpdateProjectFormSchema } from '../validations/UpdateProjectFormSchema';
 import { toast } from 'sonner';
+import { routes } from '@/lib/routes';
 
 
 type UpdateProjectFormProps = {
@@ -45,7 +46,7 @@ export const UpdateProjectForm = ({ projectDetails }: UpdateProjectFormProps) =>
 
         if (result.ok) {
             toast.success('Project updated successfully!')
-            router.push(`/project/${projectId}/epics`)
+            router.push(routes.project.list)
         } else {
             toast.error(result.error)
             setError('root', { message: result.error })
