@@ -9,6 +9,7 @@ import { signInAction } from '../actions/signInAction';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { routes } from '@/lib/routes';
 
 
 
@@ -33,7 +34,7 @@ export const SignInForm = () => {
 
         if (result.ok) {
             toast.success('Welcome back!')
-            router.push('/project')
+            router.push(routes.project.list)
         } else {
             toast.error(result.error)
             setError('root', { message: result.error })
@@ -81,7 +82,7 @@ export const SignInForm = () => {
                             <label htmlFor="remember-me" className='ml-2 cursor-pointer'>Remember Me</label>
                         </div>
 
-                        <Link href="/forget-password" className="type-body-md text-primary">
+                        <Link href={routes.auth.forgetPassword} className="type-body-md text-primary">
                             Forgot Password?
                         </Link>
                     </div>
@@ -97,7 +98,7 @@ export const SignInForm = () => {
                 {/* card footer */}
                 <div className="flex mt-4 justify-center">
                     <p className="type-body-md mr-2">Don&apos;t have an account?</p>
-                    <Link href="/sign-up" className="type-body-md text-primary">
+                    <Link href={routes.auth.signUp} className="type-body-md text-primary">
                         Sign Up
                     </Link>
                 </div>

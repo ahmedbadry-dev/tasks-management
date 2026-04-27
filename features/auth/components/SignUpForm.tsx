@@ -9,6 +9,7 @@ import Link from "next/link";
 import { PasswordRequirements } from "./PasswordRequirements";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { routes } from "@/lib/routes";
 
 // import { Loader2 } from "lucide-react"
 
@@ -35,7 +36,7 @@ export const SignUpForm = () => {
 
         if (result.ok) {
             toast.success('Account created successfully!')
-            router.push('/project')
+            router.push(routes.project.list)
         } else {
             toast.error(result.error)
             setError("root", { message: result.error })
@@ -137,7 +138,7 @@ export const SignUpForm = () => {
                 {/* card footer */}
                 <div className="flex mt-4 justify-center">
                     <p className="type-body-md mr-2">Already have an account?</p>
-                    <Link href="/sign-in" className="type-body-md text-primary">
+                    <Link href={routes.auth.signIn} className="type-body-md text-primary">
                         Login
                     </Link>
                 </div>

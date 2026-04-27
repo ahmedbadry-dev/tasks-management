@@ -4,6 +4,7 @@ import { MembersMobileList } from "./MembersMobileList"
 import { InviteUserIcon } from "@/shared/components/icons"
 import { getProjectMembersAction } from "../actions/getProjectMembersAction"
 import { redirect } from "next/navigation"
+import { routes } from "@/lib/routes"
 
 
 type ProjectMembersViewProps = {
@@ -12,7 +13,7 @@ type ProjectMembersViewProps = {
 export const ProjectMembersView = async ({ projectId }: ProjectMembersViewProps) => {
 
     const result = await getProjectMembersAction(projectId)
-    if (!result.success) redirect('/project')
+    if (!result.success) redirect(routes.project.list)
 
 
     return (
