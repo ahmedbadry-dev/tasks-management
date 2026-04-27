@@ -20,23 +20,6 @@ export type TEpic = {
 }
 export type TEpicDetails = TEpic
 
-export type EpicsState = {
-  items: TEpic[]
-  currentPage: number
-  totalCount: number
-  limit: number
-  hasNextPage: boolean
-  status: RequestStatus
-  isFetchingPage: boolean
-  error: string | null
-  activeRequestId: string | null
-
-  detailsById: Record<string, TEpicDetails>
-  detailsStatusById: Record<string, RequestStatus>
-  detailsErrorById: Record<string, string | null>
-  detailsRequestIdById: Record<string, string | null>
-}
-
 export type TProjectEpicBody = {
   project_id: string
   title: string

@@ -1,8 +1,13 @@
 import { EmptyPageCard } from "@/features/project-epic/components/EmptyPageCard"
 import { BoltIcon, ConnectionIcon, SparklesIcon, TemplateSelectionIllustration, TuneIcon } from "@/shared/components/icons"
 import Link from "next/link"
+import { routes } from "@/lib/routes"
 
-export const NoEpics = () => {
+type Props = {
+    projectId: string
+}
+
+export const NoEpics = ({ projectId }: Props) => {
     return (
         <section className="flex w-full max-w-3xl flex-col items-center justify-center gap-10 rounded-lg p-6 text-center">
             <div className="relative mx-auto w-fit">
@@ -15,7 +20,7 @@ export const NoEpics = () => {
                 <h1 className="heading-2">No epics in this project yet.</h1>
                 <p className="text-[10px] md:text-[16px] md:type-body-md max-w-sm">Break down your large project into manageable epics to track progress better and maintain architectural clarity.</p>
                 <Link
-                    href={'epics/new'}
+                    href={routes.project.newEpic(projectId)}
                     aria-label="Create New Project"
                     className="
                         btn btn-primary

@@ -12,6 +12,7 @@ import { AddProjectEpicSchema, TAddProjectEpicSchema } from '../validations/AddP
 import { addProjectEpicAction } from '../actions/addProjectEpicAction';
 import { TMember } from '../types';
 import { toast } from 'sonner';
+import { routes } from '@/lib/routes';
 
 type TAddProjectEpicFormProps = {
     projectId: string
@@ -50,7 +51,7 @@ export const AddProjectEpicForm = ({ members = [], projectId }: TAddProjectEpicF
 
         if (result.ok) {
             toast.success('Epic created successfully!')
-            router.push(`/project/${projectId}/epics`)
+            router.push(routes.project.epics(projectId))
         } else {
             toast.error(result.error)
             setError('root', { message: result.error })
