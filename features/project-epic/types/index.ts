@@ -28,6 +28,15 @@ export type TProjectEpicBody = {
   deadline?: string | null
 }
 
+// Partial payload used for inline field-by-field updates.
+// We only send the fields that changed.
+export type TUpdateProjectEpicPatch = Partial<{
+  title: string
+  description: string | null
+  assignee_id: string | null
+  deadline: string | null
+}>
+
 export type TMember = {
   member_id: string
   project_id: string
