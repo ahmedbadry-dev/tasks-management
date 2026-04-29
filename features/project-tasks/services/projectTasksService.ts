@@ -2,7 +2,7 @@ import { env } from '@/lib/env'
 
 import { parseApiError } from '@/utils/parseApiError'
 // import { toSafeEpicId } from '../utils/toSafeEpicId'
-import { TAddTaskBody } from '../types'
+import { TAddTaskBody, TTask } from '../types'
 
 export const projectTasksService = {
   addNewTask: async (
@@ -20,5 +20,27 @@ export const projectTasksService = {
     })
 
     if (!response.ok) throw await parseApiError(response)
+  },
+  getEpicTasks: async (
+    epicId: string,
+    accessToken: string,
+    signal?: AbortSignal
+  ): Promise<TTask[]> => {
+    const response = await fetch(
+      `${env.apiUrl}/rest/v1/project_tasks?epic_id=eq.${epicId}`,
+      {
+        method: 'GET',
+        headers: {
+          apikey: env.anonKey,
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        signal,
+      }
+    )
+
+    if (!response.ok) throw await parseApiError(response)
+
+    return await response.json()
   },
 }
