@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { MainContentHeader } from '@/shared/components/MainContentHeader'
 import { Pagination } from '@/shared/components/Pagination'
@@ -14,6 +14,8 @@ import { EpicMobileCard } from './EpicMobileCard'
 import { EpicsPageSkeleton } from './EpicsPageSkeleton'
 import { NoEpics } from './NoEpics'
 import { routes } from '@/lib/routes'
+import { useAppSelector } from '@/store/hooks'
+import { selectEpicPatchesById } from '@/store/projectEpicPatchesStore/projectEpicPatchesSlice'
 
 type Props = {
     projectId: string
@@ -21,6 +23,8 @@ type Props = {
 }
 
 export const ProjectEpicsView = ({ projectId, accessToken }: Props) => {
+    const epicPatchesById = useAppSelector(selectEpicPatchesById)
+
     const fetchFn = useCallback(
         (page: number, signal: AbortSignal) =>
             projectEpicsService.getProjectEpics(accessToken, page, projectId, signal),
@@ -43,7 +47,37 @@ export const ProjectEpicsView = ({ projectId, accessToken }: Props) => {
         retry,
     } = usePaginatedFetch<TEpic>({ fetchFn, limit: PROJECTS_PAGE_SIZE })
 
-    const hasEpics = epics.length > 0
+    const mergedEpics = useMemo(
+        () =>
+            epics.map((epic) => {
+                const patch = epicPatchesById[epic.id]
+                if (!patch) return epic
+
+                const mergedAssignee =
+                    patch.assignee === undefined
+                        ? epic.assignee
+                        : patch.assignee.id === null
+                            ? null
+                            : {
+                                sub: patch.assignee.id,
+                                name: patch.assignee.name,
+                                email: epic.assignee?.email ?? '',
+                                department: epic.assignee?.department ?? null,
+                            }
+
+                return {
+                    ...epic,
+                    title: patch.title ?? epic.title,
+                    description:
+                        patch.description === undefined ? epic.description : patch.description ?? '',
+                    deadline: patch.deadline === undefined ? epic.deadline : patch.deadline ?? '',
+                    assignee: mergedAssignee,
+                }
+            }),
+        [epics, epicPatchesById]
+    )
+
+    const hasEpics = mergedEpics.length > 0
     const hasAnyEpics = totalCount > 0
 
     if (isDesktop === null || isInitialLoading) {
@@ -83,7 +117,7 @@ export const ProjectEpicsView = ({ projectId, accessToken }: Props) => {
             >
                 {hasEpics ? (
                     <>
-                        {epics.map((epic) =>
+                        {mergedEpics.map((epic) =>
                             isDesktop ? (
                                 <EpicDesktopCard key={epic.id} {...epic} />
                             ) : (

@@ -7,7 +7,7 @@ import { useAppDispatch } from "@/store/hooks"
 import { openModal } from "@/store/uiStore/uiSlice"
 
 
-export const EpicMobileCard = ({ id, project_id, epic_id, title, description, deadline, assignee }: TEpic) => {
+export const EpicMobileCard = ({ id, project_id, epic_id, title, deadline, assignee }: TEpic) => {
 
     const dispatch = useAppDispatch()
 
@@ -40,12 +40,12 @@ export const EpicMobileCard = ({ id, project_id, epic_id, title, description, de
                     <div>
                         <p className="type-body-md text-[12px]">Assignee</p>
                         {/* member name */}
-                        <p className="type-title-md text-[14px]">{assignee?.name}</p>
+                        <p className="type-title-md text-[14px]">{assignee?.name ?? 'Unassigned'}</p>
                     </div>
                 </div>
                 <div>
                     <p className="type-label-sm text-slate-400">deadline</p>
-                    <p className="type-body-md font-semibold">{formatServerDateTime(deadline).date}</p>
+                    <p className="type-body-md font-semibold">{deadline ? formatServerDateTime(deadline).date : '-'}</p>
                 </div>
             </div>
         </div>

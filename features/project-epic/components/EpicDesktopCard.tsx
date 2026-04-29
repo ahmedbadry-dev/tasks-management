@@ -30,7 +30,7 @@ export const EpicDesktopCard = ({ id, project_id, title, assignee, created_at, c
             <div>
                 <h1 className="heading-3 mb-4 max-w-[80%] truncate">{title}</h1>
                 {/* member info */}
-                <EpicMemberIdentity name={assignee?.name as string} epic_id={epic_id} />
+                <EpicMemberIdentity name={assignee?.name ?? 'Unassigned'} epic_id={epic_id} />
             </div>
             {/* card footer */}
             <div className="flex justify-between text-[11px]">
