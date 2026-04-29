@@ -6,7 +6,13 @@ import { EpicsInlineAssigneeField } from './EpicsInlineAssigneeField'
 import { EpicsInlineDeadlineField } from './EpicsInlineDeadlineField'
 import { EpicsCreatedByField } from './EpicsCreatedByField'
 import { EpicsCreatedAtField } from './EpicsCreatedAtField'
-import { EpicsTasksPlaceholder } from './EpicsTasksPlaceholder'
+import { EpicTasksList } from '@/features/project-tasks/components/EpicTasksList'
+import { useEpicTasks } from '@/features/project-tasks/hooks/useEpicTasks'
+import { useRouter } from 'next/navigation'
+import { routes } from '@/lib/routes'
+import { PlusIcon } from '@/shared/components/icons'
+import { useAppDispatch } from '@/store/hooks'
+import { closeModal } from '@/store/uiStore/uiSlice'
 
 type Props = {
   selectedEpic: TEpicDetails
@@ -38,10 +44,25 @@ export const EpicsModelDetails = ({
   membersError,
   onLoadMembers,
 }: Props) => {
+  const dispatch = useAppDispatch()
   const createdByName = selectedEpic.created_by?.name ?? '-'
   const createdAtDate = selectedEpic.created_at
     ? formatServerDateTime(selectedEpic.created_at).date
     : '-'
+  const router = useRouter()
+  const epicId = selectedEpic.id
+  const { tasks, status, error, retry } = useEpicTasks({
+    isOpen: true,
+    epicId,
+  })
+
+
+
+
+  const handleAddTask = () => {
+    dispatch(closeModal())
+    router.push(routes.project.newTask(selectedEpic.project_id, selectedEpic.id))
+  }
 
   return (
     <>
@@ -99,7 +120,26 @@ export const EpicsModelDetails = ({
         </div>
       </div>
 
-      <EpicsTasksPlaceholder epic={selectedEpic} />
+      {/* <EpicsTasksPlaceholder epic={selectedEpic} /> */}
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <p className="type-label-sm text-lg">Tasks</p>
+          <button onClick={handleAddTask} className="btn btn-ghost hidden text-primary md:flex">
+            <PlusIcon />
+            Add Task
+          </button>
+          <div className="type-label-sm rounded-2xl bg-surface-highest px-2 py-1 md:hidden">
+            <span>{tasks.length}</span> Tasks
+          </div>
+        </div>
+        <EpicTasksList
+          tasks={tasks}
+          status={status}
+          error={error}
+          onRetry={retry}
+          handleAddTask={handleAddTask}
+        />
+      </div>
     </>
   )
 }
