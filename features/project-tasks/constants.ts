@@ -8,3 +8,5 @@ export const TASK_STATUS_OPTIONS = [
   { label: 'Ready For Production', value: 'READY_FOR_PRODUCTION' },
   { label: 'Done', value: 'DONE' },
 ] as const
+
+export const TASKS_PAGE_SIZE = 10

@@ -61,7 +61,7 @@ export const EpicsModelDetails = ({
 
   const handleAddTask = () => {
     dispatch(closeModal())
-    router.push(routes.project.newTask(selectedEpic.project_id, selectedEpic.id))
+    router.push(routes.project.newTask(selectedEpic.project_id, { epicId: selectedEpic.id }))
   }
 
   return (

@@ -19,14 +19,30 @@ type TAddNewTaskFormProps = {
     projectId: string
     members: TMember[]
     epics: TEpic[]
-    epicId: string
+    epicId?: string
+    status?: string
 }
 
+type TaskStatus = TAddTaskSchema['status']
+
+const isTaskStatus = (value: string): value is TaskStatus =>
+    TASK_STATUS_OPTIONS.some((option) => option.value === value)
 
 
-export const AddNewTaskForm = ({ members = [], projectId, epics = [], epicId }: TAddNewTaskFormProps) => {
+
+export const AddNewTaskForm = ({
+    members = [],
+    projectId,
+    epics = [],
+    epicId,
+    status,
+}: TAddNewTaskFormProps) => {
     const [isCanceling, setIsCanceling] = useState(false)
     const router = useRouter()
+    const normalizedStatus: TaskStatus =
+        status && isTaskStatus(status)
+            ? status
+            : 'TO_DO'
 
     const { register, handleSubmit, formState: { errors, isSubmitting }, setError, clearErrors } = useForm<TAddTaskSchema>({
         resolver: zodResolver(addTaskSchema),
@@ -37,7 +53,7 @@ export const AddNewTaskForm = ({ members = [], projectId, epics = [], epicId }: 
             description: '',
             assignee_id: '',
             due_date: '',
-            status: 'TO_DO',
+            status: normalizedStatus,
         },
         mode: 'onBlur'
     })

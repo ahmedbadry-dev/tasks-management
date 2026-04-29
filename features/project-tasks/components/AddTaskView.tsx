@@ -7,7 +7,15 @@ import { getProjectMembersAction } from "@/features/project-epic/actions/getProj
 
 
 
-export const AddTaskView = async ({ projectId, epicId }: { projectId: string, epicId: string }) => {
+export const AddTaskView = async ({
+    projectId,
+    epicId,
+    status,
+}: {
+    projectId: string
+    epicId?: string
+    status?: string
+}) => {
 
     const [membersResult, epicsResult] = await Promise.all([
         getProjectMembersAction(projectId),
@@ -24,7 +32,13 @@ export const AddTaskView = async ({ projectId, epicId }: { projectId: string, ep
                 msg="Initialize a new work item within the Architectural Workspace ecosystem."
             />
             <div className=" flex justify-center pt-5 sm:pt-10">
-                <AddNewTaskForm members={membersResult.data} epics={epicsResult.data} projectId={projectId} epicId={epicId} />
+                <AddNewTaskForm
+                    members={membersResult.data}
+                    epics={epicsResult.data}
+                    projectId={projectId}
+                    epicId={epicId}
+                    status={status}
+                />
             </div>
         </div>
     )
