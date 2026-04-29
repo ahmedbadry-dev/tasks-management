@@ -10,7 +10,7 @@ type TSelectOption = {
 interface ISelectProps<T extends FieldValues> {
     name: Path<T>
     register: UseFormRegister<T>
-    options: TSelectOption[]
+    options: readonly TSelectOption[] | TSelectOption[]
     label?: string
     error?: FieldError
     placeholder?: string

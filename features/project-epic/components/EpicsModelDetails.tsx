@@ -73,8 +73,9 @@ export const EpicsModelDetails = ({
       />
 
       {/* Metadata layout:
-          - mobile: 2 columns (Deadline + CreatedAt share the second row)
-          - desktop: 3 items in first row, CreatedAt in a full row below */}
+          - mobile: 2 columns 
+          - desktop: 3 items in first row
+      */}
       <div className="grid grid-cols-2 gap-4 border-b border-slate-400/20 pb-4 md:grid-cols-3">
         <EpicsCreatedByField createdByName={createdByName} />
 
@@ -98,7 +99,7 @@ export const EpicsModelDetails = ({
         </div>
       </div>
 
-      <EpicsTasksPlaceholder />
+      <EpicsTasksPlaceholder epic={selectedEpic} />
     </>
   )
 }

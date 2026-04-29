@@ -135,4 +135,27 @@ export const projectEpicsService = {
 
     if (!response.ok) throw await parseApiError(response)
   },
+  getAllProjectEpics: async (
+    project_id: string,
+    accessToken: string,
+    signal?: AbortSignal
+  ): Promise<TEpic[]> => {
+    const safeProjectId = toSafeProjectId(project_id)
+
+    const response = await fetch(
+      `${env.apiUrl}/rest/v1/project_epics?project_id=eq.${safeProjectId}&order=created_at.desc,id.desc`,
+      {
+        method: 'GET',
+        headers: {
+          apikey: env.anonKey,
+          Authorization: `Bearer ${accessToken}`,
+        },
+        signal,
+      }
+    )
+
+    if (!response.ok) throw await parseApiError(response)
+
+    return await response.json()
+  },
 }
