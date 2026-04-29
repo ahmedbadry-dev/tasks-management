@@ -3,6 +3,8 @@ import { toast } from 'sonner'
 import { MemberAvatar } from '@/features/project-members/components/MemberAvatar'
 import { updateProjectEpicAction } from '../actions/updateProjectEpicAction'
 import { RequestStatus, TMember } from '../types'
+import { useAppDispatch } from '@/store/hooks'
+import { upsertEpicPatch } from '@/store/projectEpicPatchesStore/projectEpicPatchesSlice'
 
 type Props = {
   epicId: string
@@ -30,6 +32,8 @@ export const EpicsInlineAssigneeField = ({
   membersError,
   onLoadMembers,
 }: Props) => {
+  const dispatch = useAppDispatch()
+
   // Assignee is shown as display mode first, then turns into picker mode on click.
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -79,11 +83,22 @@ export const EpicsInlineAssigneeField = ({
       }
 
       setStableValue({ id: nextId, name: nextName })
+      dispatch(
+        upsertEpicPatch({
+          epicId,
+          patch: {
+            assignee: {
+              id: nextId,
+              name: nextName,
+            },
+          },
+        })
+      )
       setIsEditing(false)
       setIsSaving(false)
       toast.success('Epic updated successfully!')
     },
-    [epicId, isSaving, stableValue]
+    [dispatch, epicId, isSaving, stableValue]
   )
 
   const canShowList = isEditing && membersStatus === 'succeeded'

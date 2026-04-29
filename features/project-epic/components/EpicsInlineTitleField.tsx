@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { updateProjectEpicAction } from '../actions/updateProjectEpicAction'
+import { useAppDispatch } from '@/store/hooks'
+import { upsertEpicPatch } from '@/store/projectEpicPatchesStore/projectEpicPatchesSlice'
 
 type Props = {
   epicId: string
@@ -10,6 +12,8 @@ type Props = {
 const UPDATE_ERROR_MESSAGE = 'Failed to update epic. Please try again.'
 
 export const EpicsInlineTitleField = ({ epicId, initialTitle }: Props) => {
+  const dispatch = useAppDispatch()
+
   // `value` is the live value being edited by the user.
   const [value, setValue] = useState(initialTitle)
 
@@ -50,9 +54,10 @@ export const EpicsInlineTitleField = ({ epicId, initialTitle }: Props) => {
     }
 
     setStableValue(nextTitle)
+    dispatch(upsertEpicPatch({ epicId, patch: { title: nextTitle } }))
     toast.success('Epic updated successfully!')
     setIsSaving(false)
-  }, [epicId, isSaving, stableValue, value])
+  }, [dispatch, epicId, isSaving, stableValue, value])
 
   return (
     <div>

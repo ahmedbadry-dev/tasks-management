@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { updateProjectEpicAction } from '../actions/updateProjectEpicAction'
+import { useAppDispatch } from '@/store/hooks'
+import { upsertEpicPatch } from '@/store/projectEpicPatchesStore/projectEpicPatchesSlice'
 
 type Props = {
   epicId: string
@@ -13,6 +15,8 @@ export const EpicsInlineDescriptionField = ({
   epicId,
   initialDescription,
 }: Props) => {
+  const dispatch = useAppDispatch()
+
   // Click-to-edit mode for the description field.
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -58,9 +62,15 @@ export const EpicsInlineDescriptionField = ({
     }
 
     setStableValue(nextDescription ?? '')
+    dispatch(
+      upsertEpicPatch({
+        epicId,
+        patch: { description: nextDescription },
+      })
+    )
     toast.success('Epic updated successfully!')
     setIsSaving(false)
-  }, [epicId, isSaving, stableValue, value])
+  }, [dispatch, epicId, isSaving, stableValue, value])
 
   return (
     <div>

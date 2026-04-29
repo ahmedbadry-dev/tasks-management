@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { updateProjectEpicAction } from '../actions/updateProjectEpicAction'
+import { useAppDispatch } from '@/store/hooks'
+import { upsertEpicPatch } from '@/store/projectEpicPatchesStore/projectEpicPatchesSlice'
 
 type Props = {
   epicId: string
@@ -10,6 +12,8 @@ type Props = {
 const UPDATE_ERROR_MESSAGE = 'Failed to update epic. Please try again.'
 
 export const EpicsInlineDeadlineField = ({ epicId, initialDeadline }: Props) => {
+  const dispatch = useAppDispatch()
+
   // Live date shown in the date picker.
   const [value, setValue] = useState(initialDeadline)
 
@@ -41,10 +45,16 @@ export const EpicsInlineDeadlineField = ({ epicId, initialDeadline }: Props) => 
       }
 
       setStableValue(nextDate)
+      dispatch(
+        upsertEpicPatch({
+          epicId,
+          patch: { deadline: nextDate || null },
+        })
+      )
       setIsSaving(false)
       toast.success('Epic updated successfully!')
     },
-    [epicId, isSaving, stableValue]
+    [dispatch, epicId, isSaving, stableValue]
   )
 
   return (
