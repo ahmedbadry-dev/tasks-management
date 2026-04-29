@@ -16,8 +16,9 @@ export const routes = {
     newEpic: (projectId: string) =>
       `/project/${encodeSegment(projectId)}/epics/new`,
     tasks: (projectId: string) => `/project/${encodeSegment(projectId)}/tasks`,
+    newTask: (projectId: string, epicId?: string) =>
+      `/project/${encodeSegment(projectId)}/tasks/new${epicId ? `?epicId=${encodeSegment(epicId)}` : ''}`,
     members: (projectId: string) =>
       `/project/${encodeSegment(projectId)}/members`,
   },
 } as const
-

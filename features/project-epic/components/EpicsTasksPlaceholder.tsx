@@ -1,11 +1,20 @@
+import { useRouter } from 'next/navigation'
+import { routes } from '@/lib/routes'
 import { ListBulletsIcon, PlusIcon } from '@/shared/components/icons'
+import { TEpic } from '../types'
 
-export const EpicsTasksPlaceholder = () => {
+export const EpicsTasksPlaceholder = ({ epic }: { epic: TEpic }) => {
+  const router = useRouter()
+
+  const handleAddTask = () => {
+    router.push(routes.project.newTask(epic.project_id, epic.id))
+  }
+
   return (
     <div>
       <div className="mb-2 flex items-center justify-between">
         <p className="type-label-sm text-lg">Tasks</p>
-        <button className="btn btn-ghost hidden text-primary md:flex">
+        <button onClick={handleAddTask} className="btn btn-ghost hidden text-primary md:flex">
           <PlusIcon />
           Add Task
         </button>
@@ -19,7 +28,7 @@ export const EpicsTasksPlaceholder = () => {
           <ListBulletsIcon className="text-primary" />
         </div>
         <p className="max-w-50 text-center">No tasks have been added to this epic yet.</p>
-        <button className="btn btn-primary rounded-none px-3 py-2 text-xs">
+        <button onClick={handleAddTask} className="btn btn-primary rounded-none px-3 py-2 text-xs">
           <PlusIcon />
           Add Task
         </button>
