@@ -12,6 +12,9 @@ export const MobileEpicTaskRow = ({ title, assignee, assignee_name, assignee_ava
     const assigneeAvatar = assignee?.avatar_url ?? assignee?.avatar ?? assignee_avatar ?? null
     const dueDateLabel = formatDueDate(due_date)
 
+
+
+
     return (
         <div className='rounded-2xl border border-surface-highest bg-white px-5 py-4 shadow-[0px_1px_2px_0px_#0000000D]'>
             {/* mobile */}
