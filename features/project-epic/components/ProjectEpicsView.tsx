@@ -1,13 +1,12 @@
 'use client'
 
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { MainContentHeader } from '@/shared/components/MainContentHeader'
 import { Pagination } from '@/shared/components/Pagination'
 import { PlusIcon } from '@/shared/components/icons'
 import { PROJECTS_PAGE_SIZE } from '@/features/projects/constants'
 import { usePaginatedFetch } from '@/hooks/usePaginatedFetch'
-import { projectEpicsService } from '../services/projectEpicsService'
 import { TEpic } from '../types'
 import { EpicDesktopCard } from './EpicDesktopCard'
 import { EpicMobileCard } from './EpicMobileCard'
@@ -16,20 +15,30 @@ import { NoEpics } from './NoEpics'
 import { routes } from '@/lib/routes'
 import { useAppSelector } from '@/store/hooks'
 import { selectEpicPatchesById } from '@/store/projectEpicPatchesStore/projectEpicPatchesSlice'
+import { getProjectEpicsAction } from '../actions/getProjectEpicsAction'
+import { useEpicsSearch } from '@/features/project-tasks/hooks/useEpicsSearch'
+
 
 type Props = {
     projectId: string
-    accessToken: string
 }
 
-export const ProjectEpicsView = ({ projectId, accessToken }: Props) => {
+export const ProjectEpicsView = ({ projectId }: Props) => {
     const epicPatchesById = useAppSelector(selectEpicPatchesById)
+    const [searchTerm, setSearchTerm] = useState('')
+    const { inputValue, handleChange } = useEpicsSearch((term) => {
+        setSearchTerm(term)
+    })
 
     const fetchFn = useCallback(
-        (page: number, signal: AbortSignal) =>
-            projectEpicsService.getProjectEpics(accessToken, page, projectId, signal),
-        [accessToken, projectId]
+        async (page: number, signal: AbortSignal) => {
+            const result = await getProjectEpicsAction(projectId, page, searchTerm)
+            if (!result.success) throw new Error(result.error)
+            return result.data
+        },
+        [projectId, searchTerm]
     )
+
 
     const {
         items: epics,
@@ -79,6 +88,7 @@ export const ProjectEpicsView = ({ projectId, accessToken }: Props) => {
 
     const hasEpics = mergedEpics.length > 0
     const hasAnyEpics = totalCount > 0
+    const isSearching = searchTerm.length > 0
 
     if (isDesktop === null || isInitialLoading) {
         return <EpicsPageSkeleton />
@@ -103,6 +113,9 @@ export const ProjectEpicsView = ({ projectId, accessToken }: Props) => {
                     title="Project Epics"
                     href={routes.project.newEpic(projectId)}
                     search
+                    searchValue={inputValue}
+                    onSearchChange={handleChange}
+                    searchPlaceholder="Search epics..."
                 />
             )}
 
@@ -127,9 +140,15 @@ export const ProjectEpicsView = ({ projectId, accessToken }: Props) => {
 
                         {!isDesktop && hasNextPage && <div ref={loaderRef} className="h-10" aria-hidden />}
                     </>
-                ) : (
-                    status === 'succeeded' && !hasAnyEpics && <NoEpics projectId={projectId} />
-                )}
+                ) : status === 'succeeded' && !hasEpics ? (
+                    isSearching ? (
+                        <p className="type-body-md text-center text-slate-400">
+                            No epics found matching your search
+                        </p>
+                    ) : (
+                        <NoEpics projectId={projectId} />
+                    )
+                ) : null}
             </main>
 
             {!isDesktop && isFetchingPage && <p>Loading more...</p>}

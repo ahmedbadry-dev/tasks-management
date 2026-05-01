@@ -33,13 +33,18 @@ export const projectEpicsService = {
     accessToken: string,
     page: number = 1,
     project_id: string,
+    searchTerm?: string,
     signal?: AbortSignal
   ): Promise<PaginatedResponse<TEpic>> => {
     const safeProjectId = toSafeProjectId(project_id)
     const offset = (page - 1) * PROJECTS_PAGE_SIZE
 
+    const searchFilter = searchTerm
+      ? `&title=ilike.%25${encodeURIComponent(searchTerm)}%25`
+      : ''
+
     const response = await fetch(
-      `${env.apiUrl}/rest/v1/project_epics?project_id=eq.${safeProjectId}&order=created_at.desc,id.desc&limit=${PROJECTS_PAGE_SIZE}&offset=${offset}`,
+      `${env.apiUrl}/rest/v1/project_epics?project_id=eq.${safeProjectId}&order=created_at.desc,id.desc&limit=${PROJECTS_PAGE_SIZE}&offset=${offset}${searchFilter}`,
       {
         method: 'GET',
         headers: {

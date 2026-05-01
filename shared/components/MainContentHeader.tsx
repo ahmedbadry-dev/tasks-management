@@ -8,6 +8,9 @@ import { SearchInput } from "./SearchInput"
 
 type MainContentHeaderProps = {
     title: string,
+    searchValue?: string
+    onSearchChange?: (value: string) => void
+    searchPlaceholder?: string
     search?: boolean
     msg?: string,
     btnText?: string,
@@ -26,7 +29,10 @@ export const MainContentHeader = (
         msg,
         title,
         href,
-        className
+        className,
+        searchValue,
+        onSearchChange,
+        searchPlaceholder,
     }: MainContentHeaderProps
 ) => {
 
@@ -40,7 +46,11 @@ export const MainContentHeader = (
                 <div className="flex gap-5">
                     {
                         search && (
-                            <SearchInput />
+                            <SearchInput
+                                value={searchValue}
+                                onChange={onSearchChange}
+                                placeholder={searchPlaceholder}
+                            />
                         )
                     }
                     <Link

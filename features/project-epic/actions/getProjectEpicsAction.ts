@@ -1,26 +1,32 @@
 'use server'
 
 import { getSession } from '@/features/auth/utils/getSession'
-import { projectEpicsService } from '../services/projectEpicsService'
-import { TEpic } from '../types'
+
 import { redirect } from 'next/navigation'
 import { parseError } from '@/utils/parseError'
 import { routes } from '@/lib/routes'
+import { PaginatedResponse } from '@/features/projects/types'
+import { TEpic } from '@/features/project-epic/types'
+import { projectEpicsService } from '@/features/project-epic/services/projectEpicsService'
 
 type GetProjectEpicsActionResult =
-  | { success: true; data: TEpic[] }
+  | { success: true; data: PaginatedResponse<TEpic> }
   | { success: false; error: string }
 
 export const getProjectEpicsAction = async (
-  project_id: string
+  projectId: string,
+  page: number,
+  searchTerm?: string
 ): Promise<GetProjectEpicsActionResult> => {
   const session = await getSession()
   if (!session) redirect(routes.auth.signIn)
 
   try {
-    const data = await projectEpicsService.getAllProjectEpics(
-      project_id,
-      session.accessToken
+    const data = await projectEpicsService.getProjectEpics(
+      session.accessToken,
+      page,
+      projectId,
+      searchTerm
     )
     return { success: true, data }
   } catch (error) {
