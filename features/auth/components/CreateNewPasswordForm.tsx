@@ -6,6 +6,7 @@ import { Input } from "@/shared/components/input";
 import { PasswordRequirements } from "./PasswordRequirements";
 import { CreateNewPasswordSchema, TCreateNewPasswordSchema } from "../validations/CreateNewPasswordSchema";
 import Link from "next/link";
+import { routes } from "@/lib/routes";
 
 
 
@@ -100,7 +101,7 @@ export const CreateNewPasswordForm = () => {
 
                 {/* card footer */}
                 <div className="flex mt-4 justify-center">
-                    <Link href="/sign-in" className="type-body-md text-primary">
+                    <Link href={routes.auth.signIn} className="type-body-md text-primary">
                         Back to sign in
                     </Link>
                 </div>

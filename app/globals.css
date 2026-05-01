@@ -480,3 +480,15 @@
     color: var(--color-slate-900);
   }
 }
+
+@layer utilities {
+  /* Hide scrollbar visuals while keeping scrolling behavior inside the modal. */
+  .modal-scroll-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .modal-scroll-hidden::-webkit-scrollbar {
+    display: none;
+  }
+}

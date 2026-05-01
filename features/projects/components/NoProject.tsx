@@ -1,6 +1,7 @@
 
 import { NoProjectsIcon, PlusIcon } from "@/shared/components/icons"
 import Link from "next/link"
+import { routes } from "@/lib/routes"
 
 export const NoProject = () => {
     return (
@@ -12,7 +13,7 @@ export const NoProject = () => {
                 <h1 className="heading-2">No Projects</h1>
                 <p className="type-body-md max-w-lg">You don't have any projects yet. Start by defining your first architectural workspace to begin tracking tasks and epics.</p>
                 <Link
-                    href={'project/add'}
+                    href={routes.project.add}
                     aria-label="Create New Project"
                     className="
                         btn btn-primary

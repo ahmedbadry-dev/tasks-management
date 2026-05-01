@@ -1,28 +1,35 @@
-// 'use server'
+'use server'
 
-// import { getSession } from '@/features/auth/utils/getSession'
-// import { projectEpicsService } from '../services/projectEpicsService'
-// import { TEpic } from '../types'
-// import { redirect } from 'next/navigation'
-// import { parseError } from '@/utils/parseError'
+import { getSession } from '@/features/auth/utils/getSession'
 
-// type GetProjectEpicsActionResult =
-//   | { success: true; data: TEpic[] }
-//   | { success: false; error: string }
+import { redirect } from 'next/navigation'
+import { parseError } from '@/utils/parseError'
+import { routes } from '@/lib/routes'
+import { PaginatedResponse } from '@/features/projects/types'
+import { TEpic } from '@/features/project-epic/types'
+import { projectEpicsService } from '@/features/project-epic/services/projectEpicsService'
 
-// export const getProjectEpicsAction = async (
-//   project_id: string
-// ): Promise<GetProjectEpicsActionResult> => {
-//   const session = await getSession()
-//   if (!session) redirect('/sign-up')
+type GetProjectEpicsActionResult =
+  | { success: true; data: PaginatedResponse<TEpic> }
+  | { success: false; error: string }
 
-//   try {
-//     const response = await projectEpicsService.getProjectEpics(
-//       project_id,
-//       session.accessToken
-//     )
-//     return { success: true, data: response }
-//   } catch (error) {
-//     return { success: false, error: parseError(error) }
-//   }
-// }
+export const getProjectEpicsAction = async (
+  projectId: string,
+  page: number,
+  searchTerm?: string
+): Promise<GetProjectEpicsActionResult> => {
+  const session = await getSession()
+  if (!session) redirect(routes.auth.signIn)
+
+  try {
+    const data = await projectEpicsService.getProjectEpics(
+      session.accessToken,
+      page,
+      projectId,
+      searchTerm
+    )
+    return { success: true, data }
+  } catch (error) {
+    return { success: false, error: parseError(error) }
+  }
+}

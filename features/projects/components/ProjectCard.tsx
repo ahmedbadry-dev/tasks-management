@@ -2,6 +2,7 @@ import Link from "next/link"
 import { TProject } from "../types"
 import { formatServerDateTime } from "../utils/formatServerDateTime"
 import { useRouter } from "next/navigation"
+import { routes } from "@/lib/routes"
 
 
 export const ProjectCard = ({ id, name, description, created_at }: TProject) => {
@@ -10,10 +11,10 @@ export const ProjectCard = ({ id, name, description, created_at }: TProject) => 
     const handleEditClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault()
         event.stopPropagation()
-        router.push(`/project/${id}/edit`)
+        router.push(routes.project.edit(id))
     }
     return (
-        <Link href={`/project/${id}/epics`}>
+        <Link href={routes.project.epics(id)}>
             <article className="h-55 overflow-hidden rounded-lg bg-white p-6 hover:shadow-md transition-shadow cursor-pointer">
                 <div className="flex h-full flex-col gap-4">
                     {/* card header */}

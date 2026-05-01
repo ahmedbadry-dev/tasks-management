@@ -5,7 +5,7 @@ import { MemberInfo } from './MemberInfo'
 type MemberIdentityProps = {
     metaData: {
         name: string;
-        email: string;
+        email?: string;
     }
 }
 export const MemberIdentity = ({
@@ -14,7 +14,7 @@ export const MemberIdentity = ({
     return (
         <div className='min-w-0 overflow-hidden flex gap-4.5 items-center'>
             <MemberAvatar name={name} />
-            <MemberInfo name={name} email={email} />
+            <MemberInfo name={name} email={email || ''} />
         </div>
     )
 }

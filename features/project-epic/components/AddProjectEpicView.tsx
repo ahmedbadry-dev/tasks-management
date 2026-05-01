@@ -3,13 +3,14 @@ import { MainContentHeader } from "@/shared/components/MainContentHeader"
 import { AddProjectEpicForm } from "./AddProjectEpicForm"
 import { getProjectMembersAction } from "../actions/getProjectMembersAction"
 import { redirect } from "next/navigation"
+import { routes } from "@/lib/routes"
 
 
 
 export const AddProjectEpicView = async ({ projectId }: { projectId: string }) => {
 
     const members = await getProjectMembersAction(projectId)
-    if (!members.success) redirect('/project')
+    if (!members.success) redirect(routes.project.list)
     return (
         <div>
             <MainContentHeader

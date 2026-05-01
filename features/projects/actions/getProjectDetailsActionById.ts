@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { parseError } from '@/utils/parseError'
 import { TProject } from '../types'
 import { projectService } from '../services/projectService'
+import { routes } from '@/lib/routes'
 
 type GetProjectDetailsByIdResult =
   | { success: true; data: TProject[] }
@@ -14,7 +15,7 @@ export const getProjectDetailsActionById = async (
   project_id: string
 ): Promise<GetProjectDetailsByIdResult> => {
   const session = await getSession()
-  if (!session) redirect('/sign-in')
+  if (!session) redirect(routes.auth.signIn)
 
   try {
     const response = await projectService.getProjectDetailsById(
