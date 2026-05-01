@@ -2,8 +2,9 @@
 import { MainContentHeader } from "@/shared/components/MainContentHeader"
 import { AddNewTaskForm } from "./AddNewTaskForm"
 
-import { getProjectEpicsAction } from "@/features/project-epic/actions/getProjectEpicsAction"
+
 import { getProjectMembersAction } from "@/features/project-epic/actions/getProjectMembersAction"
+import { getAllProjectEpicsAction } from "@/features/project-epic/actions/getAllProjectEpicsAction"
 
 
 
@@ -19,7 +20,7 @@ export const AddTaskView = async ({
 
     const [membersResult, epicsResult] = await Promise.all([
         getProjectMembersAction(projectId),
-        getProjectEpicsAction(projectId),
+        getAllProjectEpicsAction(projectId),
     ])
 
     if (!membersResult.success) throw new Error(membersResult.error)
