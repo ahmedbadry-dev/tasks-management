@@ -2,6 +2,8 @@ import { MemberAvatar } from '@/features/project-members/components/MemberAvatar
 import { formatServerDateTime } from '@/features/projects/utils/formatServerDateTime'
 import { MoreVerticalIcon, CalendarIcon, UserIcon } from '@/shared/components/icons'
 import { TTask } from '../types'
+import { useAppDispatch } from '@/store/hooks'
+import { openModal } from '@/store/uiStore/uiSlice'
 
 const STATUS_STYLES: Record<string, string> = {
     TO_DO: 'bg-slate-100 text-slate-600',
@@ -14,9 +16,20 @@ const STATUS_STYLES: Record<string, string> = {
     DONE: 'bg-emerald-100 text-emerald-600',
 }
 
-export const TasksMobileCard = ({ task_id, title, status, due_date, assignee }: TTask) => {
+export const TasksMobileCard = ({ task_id, title, status, due_date, assignee, id, project_id }: TTask) => {
+
+    const dispatch = useAppDispatch()
+
+    const handleClick = () => {
+        dispatch(openModal({
+            modalType: 'TASK_DETAILS',
+            payload: { taskId: id, projectId: project_id },
+        }))
+    }
     return (
-        <div className="flex flex-col gap-4 rounded-lg bg-white p-4 shadow-[0px_1px_2px_0px_#0000000D]">
+        <div
+            onClick={handleClick}
+            className="flex flex-col gap-4 rounded-lg bg-white p-4 shadow-[0px_1px_2px_0px_#0000000D]">
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
