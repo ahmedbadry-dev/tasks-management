@@ -95,4 +95,28 @@ export const projectTasksService = {
 
     return { data, totalCount }
   },
+  getTaskDetails: async (
+    taskId: string,
+    projectId: string,
+    accessToken: string
+  ): Promise<TTask> => {
+    const response = await fetch(
+      `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}&id=eq.${taskId}&limit=1`,
+      {
+        method: 'GET',
+        headers: {
+          apikey: env.anonKey,
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    if (!response.ok) throw await parseApiError(response)
+
+    const data = await response.json()
+    if (!data.length) throw new Error('Task not found')
+
+    return data[0]
+  },
 }
