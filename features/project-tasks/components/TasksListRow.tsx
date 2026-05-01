@@ -1,6 +1,8 @@
 import { getInitials } from '@/utils/getInitials'
 import { TTask } from '../types'
 import { UserIcon } from '@/shared/components/icons'
+import { useAppDispatch } from '@/store/hooks'
+import { openModal } from '@/store/uiStore/uiSlice'
 
 const formatDueDate = (date: string | null): string => {
     if (!date) return '—'
@@ -22,9 +24,20 @@ const STATUS_STYLES: Record<string, string> = {
     DONE: 'bg-emerald-100 text-emerald-600',
 }
 
-export const TasksListRow = ({ task_id, title, status, due_date, assignee }: TTask) => {
+export const TasksListRow = ({ task_id, title, status, due_date, assignee, project_id, id }: TTask) => {
+
+    const dispatch = useAppDispatch()
+
+    const handleClick = () => {
+        dispatch(openModal({
+            modalType: 'TASK_DETAILS',
+            payload: { taskId: id, projectId: project_id },
+        }))
+    }
     return (
-        <tr className="border-b border-slate-100 hover:bg-surface-low/40">
+        <tr
+            onClick={handleClick}
+            className="border-b border-slate-100 hover:bg-surface-low/40">
             <td className="px-8 py-5">
                 <span className="type-label-sm font-medium text-primary">{task_id}</span>
             </td>

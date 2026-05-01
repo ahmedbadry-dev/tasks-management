@@ -1,16 +1,30 @@
-import { CalendarIcon, WarningTriangleIcon } from '@/shared/components/icons'
+import { CalendarIcon, UserIcon, WarningTriangleIcon } from '@/shared/components/icons'
 import { TTask } from '../types'
 import { formatDueDate } from '@/utils/formatDueDate'
 import { getInitials } from '@/utils/getInitials'
 import { cn } from '@/utils/cn'
+import { useAppDispatch } from '@/store/hooks'
+import { openModal } from '@/store/uiStore/uiSlice'
 
 
-export const TasksBoardCard = ({ task_id, title, assignee, due_date, status }: TTask) => {
+export const TasksBoardCard = ({ task_id, title, assignee, due_date, status, project_id, id }: TTask) => {
+
+    const dispatch = useAppDispatch()
+
+    const handleClick = () => {
+        dispatch(openModal({
+            modalType: 'TASK_DETAILS',
+            payload: { taskId: id, projectId: project_id },
+        }))
+    }
+
     return (
-        <div className={cn("flex flex-col gap-3 rounded-lg bg-white p-3 shadow-sm",
-            status === 'BLOCKED' && 'bg-error-container border border-error/40',
-            status === 'IN_PROGRESS' && 'border-l-3 border-primary'
-        )}>
+        <div
+            onClick={handleClick}
+            className={cn("flex flex-col gap-3 rounded-lg bg-white p-3 shadow-sm",
+                status === 'BLOCKED' && 'bg-error-container border border-error/40',
+                status === 'IN_PROGRESS' && 'border-l-3 border-primary'
+            )}>
             <p className="type-body-md font-medium">{title}</p>
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1 text-slate-400">
@@ -34,7 +48,7 @@ export const TasksBoardCard = ({ task_id, title, assignee, due_date, status }: T
                     </div>
                 ) : (
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-surface-highest text-xs text-slate-400">
-                        ?
+                        <span><UserIcon size={10} /></span>
                     </div>
                 )}
             </div>
@@ -42,4 +56,3 @@ export const TasksBoardCard = ({ task_id, title, assignee, due_date, status }: T
     )
 }
 
-//  <span className='bg-surface-low p-2 rounded-md'><UserIcon /></span>
