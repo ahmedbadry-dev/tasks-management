@@ -3,6 +3,7 @@
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { closeModal, selectIsModalOpen, selectModalPayload, selectModalType } from '@/store/uiStore/uiSlice'
 import { EpicsModel } from '@/features/project-epic/components/EpicsModel'
+import { TaskDetailsModal } from '@/features/project-tasks/components/TaskDetailsModal'
 // import { TaskDetailsModal } from ...
 
 type Props = {
@@ -28,6 +29,20 @@ export const ModalHost = ({ accessToken }: Props) => {
                 epicId={epicPayload.epicId}
                 projectId={epicPayload.projectId}
                 accessToken={accessToken}
+                onClose={onClose}
+            />
+        )
+    }
+
+    if (modalType === 'TASK_DETAILS') {
+        const taskPayload = payload as { taskId: string; projectId: string } | null
+        if (!taskPayload) return null
+
+        return (
+            <TaskDetailsModal
+                isOpen
+                taskId={taskPayload.taskId}
+                projectId={taskPayload.projectId}
                 onClose={onClose}
             />
         )
