@@ -16,7 +16,7 @@ import { routes } from '@/lib/routes'
 import { useAppSelector } from '@/store/hooks'
 import { selectEpicPatchesById } from '@/store/projectEpicPatchesStore/projectEpicPatchesSlice'
 import { getProjectEpicsAction } from '../actions/getProjectEpicsAction'
-import { useEpicsSearch } from '@/features/project-tasks/hooks/useEpicsSearch'
+import { useDebouncedSearch } from '@/shared/hooks/useDebouncedSearch'
 
 
 type Props = {
@@ -26,7 +26,7 @@ type Props = {
 export const ProjectEpicsView = ({ projectId }: Props) => {
     const epicPatchesById = useAppSelector(selectEpicPatchesById)
     const [searchTerm, setSearchTerm] = useState('')
-    const { inputValue, handleChange } = useEpicsSearch((term) => {
+    const { inputValue, handleChange } = useDebouncedSearch((term) => {
         setSearchTerm(term)
     })
 
