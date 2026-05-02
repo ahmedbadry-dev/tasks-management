@@ -10,6 +10,7 @@ import { forgotPasswordAction } from '../actions/forgotPasswordAction';
 import Link from 'next/link';
 import clsx from 'clsx';
 import { routes } from '@/lib/routes';
+import { Spinner } from '@/shared/components/Spinner';
 
 const RESEND_TRIALS_KEY = 'forgot_password_resend_trials'
 const RESEND_TIMER_KEY = 'forgot_password_resend_timer_end'
@@ -157,7 +158,12 @@ export const ForgetPasswordForm = () => {
                         )}
                         disabled={isSubmitting || isEmailSent}
                     >
-                        {isSubmitting ? "Sending..." : "Send Reset Link"}
+                        {isSubmitting ? (
+                            <span className="inline-flex items-center gap-2">
+                                <Spinner size="sm" label="Sending reset link" className="border-white/40 border-t-white" />
+                                <span>Send Reset Link</span>
+                            </span>
+                        ) : "Send Reset Link"}
                     </button>
 
                     <Link
