@@ -14,6 +14,7 @@ import { routes } from '@/lib/routes';
 import { TEpic, TMember } from '@/features/project-epic/types';
 import { addNewTaskAction } from '../actions/addNewTaskAction';
 import { TASK_STATUS_OPTIONS } from '../constants';
+import { Spinner } from '@/shared/components/Spinner';
 
 type TAddNewTaskFormProps = {
     projectId: string
@@ -176,7 +177,12 @@ export const AddNewTaskForm = ({
                                 disabled={isSubmitting || isCanceling}
                                 onClick={handleCancel}
                             >
-                                {isCanceling ? 'Backing...' : 'Back'}
+                                {isCanceling ? (
+                                    <span className="inline-flex items-center gap-2">
+                                        <Spinner size="sm" label="Going back" />
+                                        <span>Backing</span>
+                                    </span>
+                                ) : 'Back'}
                             </button>
 
                             <button
@@ -184,7 +190,12 @@ export const AddNewTaskForm = ({
                                 className="btn btn-primary mt-2 max-sm:w-full "
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting ? 'Creating Task...' : 'Create Task'}
+                                {isSubmitting ? (
+                                    <span className="inline-flex items-center gap-2">
+                                        <Spinner size="sm" label="Creating task" className="border-white/40 border-t-white" />
+                                        <span>Create Task</span>
+                                    </span>
+                                ) : 'Create Task'}
                             </button>
                         </div>
                     </form>

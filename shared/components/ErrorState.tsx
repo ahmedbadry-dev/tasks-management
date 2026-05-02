@@ -1,5 +1,6 @@
 import { cn } from "@/utils/cn"
 import { CloudOffIcon } from "./icons"
+import { Spinner } from "./Spinner"
 
 type ErrorProps = {
     title?: string
@@ -48,7 +49,12 @@ export const ErrorState = ({
                         "
                     >
                         <span className="type-body-md text-background ">
-                            {isRetrying ? "Retrying..." : retryLabel}
+                            {isRetrying ? (
+                                <span className="inline-flex items-center gap-2">
+                                    <Spinner size="sm" label="Retrying" className="border-white/40 border-t-white" />
+                                    <span>Retrying</span>
+                                </span>
+                            ) : retryLabel}
                         </span>
                     </button>
                 )}
