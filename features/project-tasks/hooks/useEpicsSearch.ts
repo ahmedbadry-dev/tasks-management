@@ -1,29 +1,9 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useDebouncedSearch } from '@/shared/hooks/useDebouncedSearch'
 
 export function useEpicsSearch(onSearch: (term: string) => void, delay = 400) {
-  const [inputValue, setInputValue] = useState('')
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const handleChange = useCallback(
-    (value: string) => {
-      setInputValue(value)
-
-      if (timerRef.current) clearTimeout(timerRef.current)
-
-      timerRef.current = setTimeout(() => {
-        onSearch(value.trim())
-      }, delay)
-    },
-    [onSearch, delay]
-  )
-
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-    }
-  }, [])
-
-  return { inputValue, handleChange }
+  // Keep this thin wrapper for backward compatibility while we migrate callers
+  // away from feature-to-feature imports into shared hooks.
+  return useDebouncedSearch(onSearch, { delay })
 }
