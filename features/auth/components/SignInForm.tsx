@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { routes } from '@/lib/routes';
+import { Spinner } from '@/shared/components/Spinner';
 
 
 
@@ -91,7 +92,12 @@ export const SignInForm = () => {
                         className="btn btn-primary w-full mt-2"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? 'LogIn...' : 'LogIn'}
+                        {isSubmitting ? (
+                            <span className="inline-flex items-center gap-2">
+                                <Spinner size="sm" label="Logging in" className="border-white/40 border-t-white" />
+                                <span>LogIn</span>
+                            </span>
+                        ) : 'LogIn'}
                     </button>
                 </form>
 

@@ -10,6 +10,7 @@ import { PasswordRequirements } from "./PasswordRequirements";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { routes } from "@/lib/routes";
+import { Spinner } from "@/shared/components/Spinner";
 
 // import { Loader2 } from "lucide-react"
 
@@ -131,7 +132,12 @@ export const SignUpForm = () => {
                         className="btn btn-primary w-full"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? "Creating Account..." : "Create Account"}
+                        {isSubmitting ? (
+                            <span className="inline-flex items-center gap-2">
+                                <Spinner size="sm" label="Creating account" className="border-white/40 border-t-white" />
+                                <span>Create Account</span>
+                            </span>
+                        ) : "Create Account"}
                     </button>
                 </form>
 

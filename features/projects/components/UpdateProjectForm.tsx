@@ -14,6 +14,7 @@ import { TProject } from '../types';
 import { TUpdateProjectFormSchema, UpdateProjectFormSchema } from '../validations/UpdateProjectFormSchema';
 import { toast } from 'sonner';
 import { routes } from '@/lib/routes';
+import { Spinner } from '@/shared/components/Spinner';
 
 
 type UpdateProjectFormProps = {
@@ -108,7 +109,12 @@ export const UpdateProjectForm = ({ projectDetails }: UpdateProjectFormProps) =>
                                 disabled={isSubmitting || isCanceling}
                                 onClick={handleCancel}
                             >
-                                {isCanceling ? 'Canceling...' : 'Cancel'}
+                                {isCanceling ? (
+                                    <span className="inline-flex items-center gap-2">
+                                        <Spinner size="sm" label="Canceling" />
+                                        <span>Canceling</span>
+                                    </span>
+                                ) : 'Cancel'}
                             </button>
 
                             <button
@@ -116,7 +122,12 @@ export const UpdateProjectForm = ({ projectDetails }: UpdateProjectFormProps) =>
                                 className="btn btn-primary mt-2 max-sm:w-full "
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting ? 'Updating...' : 'Save'}
+                                {isSubmitting ? (
+                                    <span className="inline-flex items-center gap-2">
+                                        <Spinner size="sm" label="Updating project" className="border-white/40 border-t-white" />
+                                        <span>Updating</span>
+                                    </span>
+                                ) : 'Save'}
                             </button>
                         </div>
                     </form>

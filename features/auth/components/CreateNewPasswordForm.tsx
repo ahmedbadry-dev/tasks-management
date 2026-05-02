@@ -7,6 +7,7 @@ import { PasswordRequirements } from "./PasswordRequirements";
 import { CreateNewPasswordSchema, TCreateNewPasswordSchema } from "../validations/CreateNewPasswordSchema";
 import Link from "next/link";
 import { routes } from "@/lib/routes";
+import { Spinner } from "@/shared/components/Spinner";
 
 
 
@@ -95,7 +96,12 @@ export const CreateNewPasswordForm = () => {
                         className="btn btn-primary w-full"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? "Update Password..." : "Update Password"}
+                        {isSubmitting ? (
+                            <span className="inline-flex items-center gap-2">
+                                <Spinner size="sm" label="Updating password" className="border-white/40 border-t-white" />
+                                <span>Update Password</span>
+                            </span>
+                        ) : "Update Password"}
                     </button>
                 </form>
 

@@ -9,6 +9,7 @@ import { useTransition } from "react"
 import { signOutAction } from "@/features/auth/actions/signOutAction"
 import { useAppDispatch } from "@/store/hooks"
 import { clearUser } from "@/store/userStore/userSlice"
+import { Spinner } from "./Spinner"
 
 type Props = {
     isCollapsed: boolean
@@ -99,7 +100,14 @@ const SidebarFooter = ({ isCollapsed, hideLabels, onToggleCollapse }: {
                 disabled={isPending}
             >
                 <LogoutIcon className="h-4 w-4" />
-                <span className={clsx(hideLabels && "md:hidden")}>{isPending ? 'Logout...' : 'Logout'}</span>
+                <span className={clsx(hideLabels && "md:hidden")}>
+                    {isPending ? (
+                        <span className="inline-flex items-center gap-2">
+                            <Spinner size="sm" label="Logging out" />
+                            <span>Logout</span>
+                        </span>
+                    ) : 'Logout'}
+                </span>
             </button>
         </div>
     )
