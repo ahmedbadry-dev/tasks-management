@@ -10,3 +10,4 @@ export const TASK_STATUS_OPTIONS = [
 ] as const
 
 export const TASKS_PAGE_SIZE = 10
+export const COLUMN_PAGE_SIZE = 8

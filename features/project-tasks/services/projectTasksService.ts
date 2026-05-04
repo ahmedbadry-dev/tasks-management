@@ -4,7 +4,7 @@ import { parseApiError } from '@/utils/parseApiError'
 // import { toSafeEpicId } from '../utils/toSafeEpicId'
 import { TAddTaskBody, TTask } from '../types'
 import { PaginatedResponse } from '@/hooks/paginated/types'
-import { TASKS_PAGE_SIZE } from '../constants'
+import { COLUMN_PAGE_SIZE, TASKS_PAGE_SIZE } from '../constants'
 
 export const projectTasksService = {
   addNewTask: async (
@@ -48,23 +48,34 @@ export const projectTasksService = {
   getColumnTasks: async (
     projectId: string,
     status: string,
-    accessToken: string
-  ): Promise<TTask[]> => {
+    accessToken: string,
+    page: number = 1
+  ): Promise<PaginatedResponse<TTask>> => {
+    const offset = (page - 1) * COLUMN_PAGE_SIZE
+
     const response = await fetch(
-      `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}&status=eq.${status}`,
+      `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}&status=eq.${status}&limit=${COLUMN_PAGE_SIZE}&offset=${offset}&order=created_at.desc`,
       {
         method: 'GET',
         headers: {
           apikey: env.anonKey,
           Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          Prefer: 'count=exact',
         },
       }
     )
 
     if (!response.ok) throw await parseApiError(response)
 
-    return await response.json()
+    const contentRange = response.headers.get('Content-Range')
+    const totalCountPart = contentRange?.split('/')[1]
+    const parsedTotalCount = totalCountPart
+      ? Number.parseInt(totalCountPart, 10)
+      : 0
+    const totalCount = Number.isNaN(parsedTotalCount) ? 0 : parsedTotalCount
+    const data = await response.json()
+
+    return { data, totalCount }
   },
   getTasksList: async (
     projectId: string,
