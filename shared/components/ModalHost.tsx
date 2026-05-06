@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { closeModal, selectIsModalOpen, selectModalPayload, selectModalType } from '@/store/uiStore/uiSlice'
 import { EpicsModel } from '@/features/project-epic/components/EpicsModel'
 import { TaskDetailsModal } from '@/features/project-tasks/components/TaskDetailsModal'
+import { InviteMemberModal } from '@/features/project-members/components/InviteMemberModal'
 // import { TaskDetailsModal } from ...
 
 type Props = {
@@ -44,6 +45,20 @@ export const ModalHost = ({ accessToken }: Props) => {
                 taskId={taskPayload.taskId}
                 projectId={taskPayload.projectId}
                 onClose={onClose}
+            />
+        )
+    }
+
+    if (modalType === 'INVITE_MEMBER') {
+        const invitePayload = payload as { projectId: string; projectName?: string } | null
+        if (!invitePayload?.projectId) return null
+
+        return (
+            <InviteMemberModal
+                isOpen={isOpen}
+                onClose={onClose}
+                projectId={invitePayload.projectId}
+                projectName={invitePayload?.projectName}
             />
         )
     }
