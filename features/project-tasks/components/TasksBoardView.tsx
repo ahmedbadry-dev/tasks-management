@@ -1,82 +1,113 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { TASK_STATUS_OPTIONS } from '../constants'
 import { TasksBoardColumn } from './TasksBoardColumn'
+import { TTask } from '../types'
+import {
+    closestCorners,
+    DndContext,
+    DragOverlay,
+} from '@dnd-kit/core'
+import { TasksBoardCard } from './TasksBoardCard'
+import { useBoardDnd } from '../hooks/useBoardDnd'
+import { useVisibleBoardColumns } from '../hooks/useVisibleBoardColumns'
 
 type Props = {
     projectId: string
 }
 
 export const TasksBoardView = ({ projectId }: Props) => {
+    const statusIds = useMemo(
+        () => TASK_STATUS_OPTIONS.map((status) => status.value),
+        []
+    )
     const scrollContainerRef = useRef<HTMLDivElement | null>(null)
-    const columnRefs = useRef(new Map<string, HTMLDivElement>())
-    const [visibleColumns, setVisibleColumns] = useState<Set<string>>(new Set())
+    const [columnTasksMap, setColumnTasksMap] = useState<Record<string, TTask[]>>(
+        () =>
+            Object.fromEntries(
+                TASK_STATUS_OPTIONS.map((status) => [status.value, [] as TTask[]])
+            )
+    )
+    const { visibleColumns, setColumnNode } = useVisibleBoardColumns({
+        rootRef: scrollContainerRef,
+    })
+    const {
+        activeTask,
+        sensors,
+        handleDragStart,
+        handleDragEnd,
+        handleDragCancel,
+    } = useBoardDnd({
+        columnTasksMap,
+        setColumnTasksMap,
+        statusIds,
+    })
 
-    useEffect(() => {
-        const rootNode = scrollContainerRef.current
-        if (!rootNode) return
+    const handleTasksLoaded = useCallback(
+        (status: string, newTasks: TTask[], mode: 'replace' | 'append') => {
+            setColumnTasksMap((prevMap) => {
+                if (mode === 'replace') {
+                    return {
+                        ...prevMap,
+                        [status]: newTasks,
+                    }
+                }
 
-        const observer = new IntersectionObserver(
-            (entries) => {
-                setVisibleColumns((previousVisibleColumns) => {
-                    let nextVisibleColumns = previousVisibleColumns
-                    let hasChanges = false
+                const existingTasks = prevMap[status] ?? []
+                const existingIds = new Set(existingTasks.map((task) => task.id))
+                const uniqueNewTasks = newTasks.filter(
+                    (task) => !existingIds.has(task.id)
+                )
 
-                    entries.forEach((entry) => {
-                        if (!entry.isIntersecting) return
-
-                        const status = (entry.target as HTMLDivElement).dataset.status
-                        if (!status || previousVisibleColumns.has(status)) return
-
-                        if (!hasChanges) {
-                            nextVisibleColumns = new Set(previousVisibleColumns)
-                            hasChanges = true
-                        }
-
-                        nextVisibleColumns.add(status)
-                    })
-
-                    return hasChanges ? nextVisibleColumns : previousVisibleColumns
-                })
-            },
-            {
-                root: rootNode,
-                rootMargin: '0px 100px',
-            }
-        )
-
-        columnRefs.current.forEach((node) => observer.observe(node))
-
-        return () => observer.disconnect()
-    }, [])
+                return {
+                    ...prevMap,
+                    [status]: [...existingTasks, ...uniqueNewTasks],
+                }
+            })
+        },
+        []
+    )
 
     return (
-        <div
-            ref={scrollContainerRef}
-            className="flex h-full min-h-0 gap-4 overflow-x-auto overflow-y-hidden pb-4"
+        <DndContext
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
         >
-            {TASK_STATUS_OPTIONS.map((status) => (
-                <div
-                    key={status.value}
-                    data-status={status.value}
-                    className="h-full"
-                    ref={(node) => {
-                        if (node) {
-                            columnRefs.current.set(status.value, node)
-                        } else {
-                            columnRefs.current.delete(status.value)
-                        }
-                    }}
-                >
-                    <TasksBoardColumn
-                        projectId={projectId}
-                        status={status.value}
-                        statusLabel={status.label}
-                        isVisible={visibleColumns.has(status.value)}
+            <div
+                ref={scrollContainerRef}
+                className="flex h-full min-h-0 gap-4 overflow-x-auto overflow-y-hidden pb-4"
+            >
+                {TASK_STATUS_OPTIONS.map((status) => (
+                    <div
+                        key={status.value}
+                        data-status={status.value}
+                        className="h-full"
+                        ref={(node) => setColumnNode(status.value, node)}
+                    >
+                        <TasksBoardColumn
+                            projectId={projectId}
+                            status={status.value}
+                            statusLabel={status.label}
+                            isVisible={visibleColumns.has(status.value)}
+                            tasks={columnTasksMap[status.value] ?? []}
+                            onTasksLoaded={handleTasksLoaded}
+                        />
+                    </div>
+                ))}
+            </div>
+            <DragOverlay dropAnimation={null}>
+                {activeTask ? (
+                    <TasksBoardCard
+                        {...activeTask}
+                        id={`overlay-${activeTask.id}`}
+                        isDragOverlay
                     />
-                </div>
-            ))}
-        </div>
+                ) : null}
+            </DragOverlay>
+        </DndContext>
     )
 }

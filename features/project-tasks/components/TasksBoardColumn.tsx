@@ -1,11 +1,18 @@
 import { PlusIcon } from '@/shared/components/icons'
 import { useRouter } from 'next/navigation'
 import { routes } from '@/lib/routes'
-import { useColumnInfiniteScroll, useColumnTasks } from '../hooks/useColumnTasks'
+import { useColumnInfiniteScroll, useColumnTasksLoader } from '../hooks/useColumnTasks'
 import { TasksBoardCard } from './TasksBoardCard'
 import { cn } from '@/utils/cn'
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import { Spinner } from '@/shared/components/Spinner'
+import { TTask } from '../types'
+import { useDroppable } from '@dnd-kit/core'
+import {
+    SortableContext,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { useColumnScrollHint } from '../hooks/useColumnScrollHint'
 
 const STATUS_DOT_STYLES: Record<string, string> = {
     TO_DO: 'bg-slate-600',
@@ -23,14 +30,26 @@ type Props = {
     status: string
     statusLabel: string
     isVisible: boolean
+    tasks: TTask[]
+    onTasksLoaded: (
+        status: string,
+        tasks: TTask[],
+        mode: 'replace' | 'append'
+    ) => void
 }
 
-export const TasksBoardColumn = ({ projectId, status, statusLabel, isVisible }: Props) => {
+export const TasksBoardColumn = ({
+    projectId,
+    status,
+    statusLabel,
+    isVisible,
+    tasks,
+    onTasksLoaded,
+}: Props) => {
     const router = useRouter()
     const scrollContainerRef = useRef<HTMLDivElement | null>(null)
-    const [showBottomShadow, setShowBottomShadow] = useState(false)
+    const { setNodeRef: setDroppableNodeRef, isOver } = useDroppable({ id: status })
     const {
-        tasks,
         totalCount,
         hasMore,
         isInitialLoading,
@@ -38,35 +57,21 @@ export const TasksBoardColumn = ({ projectId, status, statusLabel, isVisible }: 
         hasInitialError,
         retry,
         loadMore,
-    } = useColumnTasks({ projectId, status, isVisible })
+    } = useColumnTasksLoader({ projectId, status, isVisible, onTasksLoaded })
     const { sentinelRef } = useColumnInfiniteScroll({
         hasMore,
         isFetchingNextPage,
         onLoadMore: loadMore,
         scrollContainerRef,
     })
-
-    useEffect(() => {
-        const container = scrollContainerRef.current
-        if (!container) return
-
-        const updateScrollHints = () => {
-            const hasOverflow = container.scrollHeight > container.clientHeight + 1
-            const isAtBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 2
-            setShowBottomShadow(hasOverflow && !isAtBottom)
-        }
-
-        updateScrollHints()
-
-        container.addEventListener('scroll', updateScrollHints, { passive: true })
-        const resizeObserver = new ResizeObserver(updateScrollHints)
-        resizeObserver.observe(container)
-
-        return () => {
-            container.removeEventListener('scroll', updateScrollHints)
-            resizeObserver.disconnect()
-        }
-    }, [tasks.length, isInitialLoading, isFetchingNextPage, hasInitialError, hasMore])
+    const { showBottomShadow } = useColumnScrollHint({
+        containerRef: scrollContainerRef,
+        tasksLength: tasks.length,
+        isInitialLoading,
+        isFetchingNextPage,
+        hasInitialError,
+        hasMore,
+    })
 
     const handleAddTask = () => {
         router.push(routes.project.newTask(projectId, { status }))
@@ -108,8 +113,14 @@ export const TasksBoardColumn = ({ projectId, status, statusLabel, isVisible }: 
             {/* Content */}
             <div className="relative min-h-0 flex-1">
                 <div
-                    ref={scrollContainerRef}
-                    className="flex h-full min-h-0 flex-col gap-2 overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:rgba(148,163,184,0.55)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-400/55 hover:[&::-webkit-scrollbar-thumb]:bg-slate-500/70"
+                    ref={(node) => {
+                        scrollContainerRef.current = node
+                        setDroppableNodeRef(node)
+                    }}
+                    className={cn(
+                        "flex h-full min-h-0 flex-col gap-2 overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:rgba(148,163,184,0.55)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-400/55 hover:[&::-webkit-scrollbar-thumb]:bg-slate-500/70",
+                        isOver && tasks.length === 0 && 'ring-2 ring-primary ring-dashed'
+                    )}
                 >
                     {isInitialLoading ? (
                         <>
@@ -127,7 +138,14 @@ export const TasksBoardColumn = ({ projectId, status, statusLabel, isVisible }: 
                     ) : tasks.length === 0 ? (
                         <p className="type-label-sm p-3 text-center text-slate-400">No tasks</p>
                     ) : (
-                        tasks.map((task) => <TasksBoardCard key={task.id} {...task} />)
+                        <SortableContext
+                            items={tasks.map((task) => task.id)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {tasks.map((task) => (
+                                <TasksBoardCard key={task.id} {...task} />
+                            ))}
+                        </SortableContext>
                     )}
                     {hasMore ? <div ref={sentinelRef} className="h-1 w-full" /> : null}
                     {isFetchingNextPage ? (

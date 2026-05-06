@@ -130,4 +130,22 @@ export const projectTasksService = {
 
     return data[0]
   },
+  updateTaskStatus: async (
+    taskId: string,
+    status: string,
+    accessToken: string
+  ): Promise<void> => {
+    const response = await fetch(`${env.apiUrl}/rest/v1/tasks?id=eq.${taskId}`, {
+      method: 'PATCH',
+      headers: {
+        apikey: env.anonKey,
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify({ status }),
+    })
+
+    if (!response.ok) throw await parseApiError(response)
+  },
 }
