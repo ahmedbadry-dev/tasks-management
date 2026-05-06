@@ -16,8 +16,20 @@ import { Spinner } from '@/shared/components/Spinner';
 
 
 
-export const SignInForm = () => {
+type SignInFormProps = {
+    redirectTo?: string
+}
+
+const sanitizeRedirectTo = (redirectTo?: string) => {
+    if (!redirectTo) return null
+    if (!redirectTo.startsWith('/')) return null
+    if (redirectTo.startsWith('//')) return null
+    return redirectTo
+}
+
+export const SignInForm = ({ redirectTo }: SignInFormProps) => {
     const router = useRouter()
+    const safeRedirectTo = sanitizeRedirectTo(redirectTo)
 
     const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<TSignInSchema>({
         resolver: zodResolver(SignInSchema),
@@ -35,7 +47,7 @@ export const SignInForm = () => {
 
         if (result.ok) {
             toast.success('Welcome back!')
-            router.push(routes.project.list)
+            router.push(safeRedirectTo ?? routes.project.list)
         } else {
             toast.error(result.error)
             setError('root', { message: result.error })
