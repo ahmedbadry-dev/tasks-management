@@ -6,14 +6,17 @@ import { TTask } from '../types'
 import { redirect } from 'next/navigation'
 import { parseError } from '@/utils/parseError'
 import { routes } from '@/lib/routes'
+import { PaginatedResponse } from '@/hooks/paginated/types'
 
 type GetColumnTasksActionResult =
-  | { success: true; data: TTask[] }
+  | { success: true; data: PaginatedResponse<TTask> }
   | { success: false; error: string }
 
 export const getColumnTasksAction = async (
   projectId: string,
-  status: string
+  status: string,
+  page: number = 1,
+  searchTerm?: string
 ): Promise<GetColumnTasksActionResult> => {
   const session = await getSession()
   if (!session) redirect(routes.auth.signIn)
@@ -22,7 +25,9 @@ export const getColumnTasksAction = async (
     const data = await projectTasksService.getColumnTasks(
       projectId,
       status,
-      session.accessToken
+      session.accessToken,
+      page,
+      searchTerm
     )
     return { success: true, data }
   } catch (error) {

@@ -14,7 +14,8 @@ type GetTasksListActionResult =
 
 export const getTasksListAction = async (
   projectId: string,
-  page: number
+  page: number,
+  searchTerm?: string
 ): Promise<GetTasksListActionResult> => {
   const session = await getSession()
   if (!session) redirect(routes.auth.signIn)
@@ -23,7 +24,9 @@ export const getTasksListAction = async (
     const data = await projectTasksService.getTasksList(
       projectId,
       page,
-      session.accessToken
+      session.accessToken,
+      undefined,
+      searchTerm
     )
     return { success: true, data }
   } catch (error) {

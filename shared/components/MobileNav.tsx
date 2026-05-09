@@ -8,7 +8,7 @@ import { isActive } from "@/utils/isActive"
 export const MobileNav = ({ hidden }: { hidden: boolean }) => {
     const pathname = usePathname()
     const { projectId } = useParams<{ projectId: string }>()
-    const links = getNavLinks(projectId)
+    const links = getNavLinks(projectId).filter((item) => !item.hideInMobileNav)
 
     return (
         <nav className={clsx(

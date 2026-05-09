@@ -1,8 +1,16 @@
 import { SignInForm } from "@/features/auth"
 
-const page = () => {
+type SignInPageProps = {
+    searchParams: Promise<{ redirectTo?: string | string[] }>
+}
+
+const page = async ({ searchParams }: SignInPageProps) => {
+    const resolvedSearchParams = await searchParams
+    const redirectToValue = resolvedSearchParams.redirectTo
+    const redirectTo = typeof redirectToValue === 'string' ? redirectToValue : undefined
+
     return (
-        <SignInForm />
+        <SignInForm redirectTo={redirectTo} />
     )
 }
 

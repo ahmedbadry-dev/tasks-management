@@ -16,6 +16,8 @@ type MainContentHeaderProps = {
     btnText?: string,
     btnIcon?: React.ReactNode
     href?: string
+    onButtonClick?: () => void
+    buttonAriaLabel?: string
     className?: string
 }
 
@@ -29,6 +31,8 @@ export const MainContentHeader = (
         msg,
         title,
         href,
+        onButtonClick,
+        buttonAriaLabel,
         className,
         searchValue,
         onSearchChange,
@@ -42,7 +46,7 @@ export const MainContentHeader = (
                 <h1 className="heading-1">{title}</h1>
                 <p className="type-body-md">{msg}</p>
             </div>
-            {href && (
+            {(href || onButtonClick) && (
                 <div className="flex gap-5">
                     {
                         search && (
@@ -53,24 +57,46 @@ export const MainContentHeader = (
                             />
                         )
                     }
-                    <Link
-                        href={href}
-                        aria-label="Create New Project"
-                        className="
-                    btn btn-primary
-                    max-md:fixed max-md:bottom-20 max-md:right-5 max-md:z-20
-                    max-md:h-14 max-md:w-14 
-                    max-md:p-0 max-md:shadow-[0px_4px_6px_-4px_#0000001A,0px_10px_15px_-3px_#0000001A]
-                    max-md:flex max-md:items-center max-md:justify-center
-                "
-                    >
-                        <span className="md:mr-1">
-                            {btnIcon}
-                        </span>
-                        <span className="type-body-md text-background max-md:hidden">
-                            {btnText}
-                        </span>
-                    </Link>
+                    {onButtonClick ? (
+                        <button
+                            type="button"
+                            onClick={onButtonClick}
+                            aria-label={buttonAriaLabel ?? btnText ?? "Header action"}
+                            className="
+                                btn btn-primary cursor-pointer
+                                max-md:fixed max-md:bottom-20 max-md:right-5 max-md:z-20
+                                max-md:h-14 max-md:w-14 
+                                max-md:p-0 max-md:shadow-[0px_4px_6px_-4px_#0000001A,0px_10px_15px_-3px_#0000001A]
+                                max-md:flex max-md:items-center max-md:justify-center
+                            "
+                        >
+                            <span className="md:mr-1">
+                                {btnIcon}
+                            </span>
+                            <span className="type-body-md text-background max-md:hidden">
+                                {btnText}
+                            </span>
+                        </button>
+                    ) : (
+                        <Link
+                            href={href!}
+                            aria-label={buttonAriaLabel ?? btnText ?? "Header action"}
+                            className="
+                                btn btn-primary
+                                max-md:fixed max-md:bottom-20 max-md:right-5 max-md:z-20
+                                max-md:h-14 max-md:w-14 
+                                max-md:p-0 max-md:shadow-[0px_4px_6px_-4px_#0000001A,0px_10px_15px_-3px_#0000001A]
+                                max-md:flex max-md:items-center max-md:justify-center
+                            "
+                        >
+                            <span className="md:mr-1">
+                                {btnIcon}
+                            </span>
+                            <span className="type-body-md text-background max-md:hidden">
+                                {btnText}
+                            </span>
+                        </Link>
+                    )}
                 </div>
             )
             }

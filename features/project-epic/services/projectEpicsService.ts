@@ -11,6 +11,7 @@ import { PaginatedResponse } from '@/features/projects/types'
 import { PROJECTS_PAGE_SIZE } from '@/features/projects/constants'
 import { toSafeProjectId } from '@/features/projects/utils/toSafeProjectId'
 import { toSafeEpicId } from '../utils/toSafeEpicId'
+import { createApiHeaders } from '@/utils/createApiHeaders'
 
 export const projectEpicsService = {
   addProjectEpic: async (
@@ -19,11 +20,7 @@ export const projectEpicsService = {
   ): Promise<void> => {
     const response = await fetch(`${env.apiUrl}/rest/v1/epics`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: env.anonKey,
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: createApiHeaders(accessToken),
       body: JSON.stringify(body),
     })
 
@@ -47,11 +44,7 @@ export const projectEpicsService = {
       `${env.apiUrl}/rest/v1/project_epics?project_id=eq.${safeProjectId}&order=created_at.desc,id.desc&limit=${PROJECTS_PAGE_SIZE}&offset=${offset}${searchFilter}`,
       {
         method: 'GET',
-        headers: {
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-          Prefer: 'count=exact',
-        },
+        headers: createApiHeaders(accessToken, { Prefer: 'count=exact' }),
         signal,
       }
     )
@@ -77,10 +70,7 @@ export const projectEpicsService = {
       `${env.apiUrl}/rest/v1/get_project_members?project_id=eq.${safeProjectId}`,
       {
         method: 'GET',
-        headers: {
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: createApiHeaders(accessToken),
         signal,
       }
     )
@@ -101,10 +91,7 @@ export const projectEpicsService = {
       `${env.apiUrl}/rest/v1/project_epics?project_id=eq.${safeProjectId}&id=eq.${safeEpicId}`,
       {
         method: 'GET',
-        headers: {
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: createApiHeaders(accessToken),
         signal,
       }
     )
@@ -129,11 +116,7 @@ export const projectEpicsService = {
       `${env.apiUrl}/rest/v1/epics?id=eq.${safeEpicId}`,
       {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: createApiHeaders(accessToken),
         body: JSON.stringify(patch),
       }
     )
@@ -151,10 +134,7 @@ export const projectEpicsService = {
       `${env.apiUrl}/rest/v1/project_epics?project_id=eq.${safeProjectId}&order=created_at.desc,id.desc`,
       {
         method: 'GET',
-        headers: {
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: createApiHeaders(accessToken),
         signal,
       }
     )

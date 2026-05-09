@@ -2,9 +2,10 @@ import { env } from '@/lib/env'
 
 import { parseApiError } from '@/utils/parseApiError'
 // import { toSafeEpicId } from '../utils/toSafeEpicId'
-import { TAddTaskBody, TTask } from '../types'
+import { TAddTaskBody, TTask, TUpdateTaskPatch } from '../types'
 import { PaginatedResponse } from '@/hooks/paginated/types'
-import { TASKS_PAGE_SIZE } from '../constants'
+import { COLUMN_PAGE_SIZE, TASKS_PAGE_SIZE } from '../constants'
+import { createApiHeaders } from '@/utils/createApiHeaders'
 
 export const projectTasksService = {
   addNewTask: async (
@@ -13,11 +14,7 @@ export const projectTasksService = {
   ): Promise<void> => {
     const response = await fetch(`${env.apiUrl}/rest/v1/tasks`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: env.anonKey,
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: createApiHeaders(accessToken),
       body: JSON.stringify(body),
     })
 
@@ -32,11 +29,7 @@ export const projectTasksService = {
       `${env.apiUrl}/rest/v1/project_tasks?epic_id=eq.${epicId}`,
       {
         method: 'GET',
-        headers: {
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
+        headers: createApiHeaders(accessToken),
         signal,
       }
     )
@@ -48,41 +41,52 @@ export const projectTasksService = {
   getColumnTasks: async (
     projectId: string,
     status: string,
-    accessToken: string
-  ): Promise<TTask[]> => {
+    accessToken: string,
+    page: number = 1,
+    searchTerm?: string
+  ): Promise<PaginatedResponse<TTask>> => {
+    const offset = (page - 1) * COLUMN_PAGE_SIZE
+    const searchFilter = searchTerm
+      ? `&title=ilike.%25${encodeURIComponent(searchTerm)}%25`
+      : ''
+
     const response = await fetch(
-      `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}&status=eq.${status}`,
+      `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}&status=eq.${status}${searchFilter}&limit=${COLUMN_PAGE_SIZE}&offset=${offset}&order=created_at.desc`,
       {
         method: 'GET',
-        headers: {
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
+        headers: createApiHeaders(accessToken, { Prefer: 'count=exact' }),
       }
     )
 
     if (!response.ok) throw await parseApiError(response)
 
-    return await response.json()
+    const contentRange = response.headers.get('Content-Range')
+    const totalCountPart = contentRange?.split('/')[1]
+    const parsedTotalCount = totalCountPart
+      ? Number.parseInt(totalCountPart, 10)
+      : 0
+    const totalCount = Number.isNaN(parsedTotalCount) ? 0 : parsedTotalCount
+    const data = await response.json()
+
+    return { data, totalCount }
   },
   getTasksList: async (
     projectId: string,
     page: number,
     accessToken: string,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    searchTerm?: string
   ): Promise<PaginatedResponse<TTask>> => {
     const offset = (page - 1) * TASKS_PAGE_SIZE
+    const searchFilter = searchTerm
+      ? `&title=ilike.%25${encodeURIComponent(searchTerm)}%25`
+      : ''
 
     const response = await fetch(
-      `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}&limit=${TASKS_PAGE_SIZE}&offset=${offset}&order=created_at.desc`,
+      `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}${searchFilter}&limit=${TASKS_PAGE_SIZE}&offset=${offset}&order=created_at.desc`,
       {
         method: 'GET',
-        headers: {
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-          Prefer: 'count=exact',
-        },
+        headers: createApiHeaders(accessToken, { Prefer: 'count=exact' }),
         signal,
       }
     )
@@ -104,11 +108,7 @@ export const projectTasksService = {
       `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}&id=eq.${taskId}&limit=1`,
       {
         method: 'GET',
-        headers: {
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
+        headers: createApiHeaders(accessToken),
       }
     )
 
@@ -118,5 +118,34 @@ export const projectTasksService = {
     if (!data.length) throw new Error('Task not found')
 
     return data[0]
+  },
+  updateTaskStatus: async (
+    taskId: string,
+    status: string,
+    accessToken: string
+  ): Promise<void> => {
+    const response = await fetch(`${env.apiUrl}/rest/v1/tasks?id=eq.${taskId}`, {
+      method: 'PATCH',
+      headers: createApiHeaders(accessToken, { Prefer: 'return=minimal' }),
+      body: JSON.stringify({ status }),
+    })
+
+    if (!response.ok) throw await parseApiError(response)
+  },
+  updateTask: async (
+    taskId: string,
+    patch: TUpdateTaskPatch,
+    accessToken: string
+  ): Promise<void> => {
+    const response = await fetch(
+      `${env.apiUrl}/rest/v1/tasks?id=eq.${encodeURIComponent(taskId)}`,
+      {
+        method: 'PATCH',
+        headers: createApiHeaders(accessToken, { Prefer: 'return=minimal' }),
+        body: JSON.stringify(patch),
+      }
+    )
+
+    if (!response.ok) throw await parseApiError(response)
   },
 }

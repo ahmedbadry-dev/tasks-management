@@ -7,6 +7,8 @@ type TaskView = 'board' | 'list'
 type Props = {
     currentView: TaskView
     onViewChange: (view: TaskView) => void
+    searchValue: string
+    onSearchChange: (value: string) => void
 }
 
 const VIEW_OPTIONS = [
@@ -14,7 +16,12 @@ const VIEW_OPTIONS = [
     { label: 'List View', value: 'list' },
 ] as const
 
-export const TasksPageHeader = ({ currentView, onViewChange }: Props) => {
+export const TasksPageHeader = ({
+    currentView,
+    onViewChange,
+    searchValue,
+    onSearchChange,
+}: Props) => {
     return (
         <header className="flex items-center justify-between p-2">
             <div>
@@ -22,7 +29,11 @@ export const TasksPageHeader = ({ currentView, onViewChange }: Props) => {
                 <p className="type-body-md">Curating your project tasks and milestones.</p>
             </div>
             <div className="flex items-center gap-3">
-                <SearchInput />
+                <SearchInput
+                    value={searchValue}
+                    onChange={onSearchChange}
+                    placeholder="Search tasks..."
+                />
                 <select
                     value={currentView}
                     onChange={(e) => onViewChange(e.target.value as TaskView)}
