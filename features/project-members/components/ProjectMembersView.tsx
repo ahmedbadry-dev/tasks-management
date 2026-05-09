@@ -1,10 +1,9 @@
-import { MainContentHeader } from "@/shared/components/MainContentHeader"
 import { MembersDesktopTable } from "./MembersDesktopTable"
 import { MembersMobileList } from "./MembersMobileList"
-import { InviteUserIcon } from "@/shared/components/icons"
 import { getProjectMembersAction } from "../actions/getProjectMembersAction"
 import { redirect } from "next/navigation"
 import { routes } from "@/lib/routes"
+import { ProjectMembersHeader } from "./ProjectMembersHeader"
 
 
 type ProjectMembersViewProps = {
@@ -18,12 +17,7 @@ export const ProjectMembersView = async ({ projectId }: ProjectMembersViewProps)
 
     return (
         <div>
-            <MainContentHeader
-                title="Project Members"
-                btnIcon={<InviteUserIcon />}
-                btnText="Invite Member"
-                href={'#'}
-            />
+            <ProjectMembersHeader projectId={projectId} />
             {/* desktop view */}
             <div className="hidden md:flex justify-center">
                 <MembersDesktopTable data={result} />
