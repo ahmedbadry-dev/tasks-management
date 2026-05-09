@@ -50,7 +50,6 @@ export const EpicsModel = ({
   const selectedEpic = epicDetails
   const epicCode = selectedEpic?.epic_id ?? '-'
   const epicTitle = selectedEpic?.title ?? 'Epic Details'
-  const mobileEpicTitle = selectedEpic?.title ?? 'Epic Details'
 
   const loadMembers = useCallback(async () => {
     if (!projectId) return
@@ -109,9 +108,9 @@ export const EpicsModel = ({
       >
         <EpicsModelHeader
           dialogTitleId={dialogTitleId}
+          epicId={selectedEpic?.id ?? null}
           epicCode={epicCode}
           epicTitle={epicTitle}
-          mobileEpicTitle={mobileEpicTitle}
           onClose={onClose}
         />
 
