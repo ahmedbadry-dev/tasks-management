@@ -49,17 +49,22 @@ export const projectTasksService = {
     projectId: string,
     status: string,
     accessToken: string,
-    page: number = 1
+    page: number = 1,
+    searchTerm?: string
   ): Promise<PaginatedResponse<TTask>> => {
     const offset = (page - 1) * COLUMN_PAGE_SIZE
+    const searchFilter = searchTerm
+      ? `&title=ilike.%25${encodeURIComponent(searchTerm)}%25`
+      : ''
 
     const response = await fetch(
-      `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}&status=eq.${status}&limit=${COLUMN_PAGE_SIZE}&offset=${offset}&order=created_at.desc`,
+      `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}&status=eq.${status}${searchFilter}&limit=${COLUMN_PAGE_SIZE}&offset=${offset}&order=created_at.desc`,
       {
         method: 'GET',
         headers: {
           apikey: env.anonKey,
           Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
           Prefer: 'count=exact',
         },
       }
@@ -81,17 +86,22 @@ export const projectTasksService = {
     projectId: string,
     page: number,
     accessToken: string,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    searchTerm?: string
   ): Promise<PaginatedResponse<TTask>> => {
     const offset = (page - 1) * TASKS_PAGE_SIZE
+    const searchFilter = searchTerm
+      ? `&title=ilike.%25${encodeURIComponent(searchTerm)}%25`
+      : ''
 
     const response = await fetch(
-      `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}&limit=${TASKS_PAGE_SIZE}&offset=${offset}&order=created_at.desc`,
+      `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}${searchFilter}&limit=${TASKS_PAGE_SIZE}&offset=${offset}&order=created_at.desc`,
       {
         method: 'GET',
         headers: {
           apikey: env.anonKey,
           Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
           Prefer: 'count=exact',
         },
         signal,

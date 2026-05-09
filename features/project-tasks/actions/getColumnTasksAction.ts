@@ -15,7 +15,8 @@ type GetColumnTasksActionResult =
 export const getColumnTasksAction = async (
   projectId: string,
   status: string,
-  page: number = 1
+  page: number = 1,
+  searchTerm?: string
 ): Promise<GetColumnTasksActionResult> => {
   const session = await getSession()
   if (!session) redirect(routes.auth.signIn)
@@ -25,7 +26,8 @@ export const getColumnTasksAction = async (
       projectId,
       status,
       session.accessToken,
-      page
+      page,
+      searchTerm
     )
     return { success: true, data }
   } catch (error) {

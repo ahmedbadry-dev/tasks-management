@@ -24,6 +24,7 @@ type UseColumnTasksLoaderOptions = {
   status: string
   isVisible: boolean
   refreshVersion?: number
+  searchTerm?: string
   onTasksLoaded: (
     status: string,
     tasks: TTask[],
@@ -147,6 +148,7 @@ export function useColumnTasksLoader({
   status,
   isVisible,
   refreshVersion = 0,
+  searchTerm = '',
   onTasksLoaded,
 }: UseColumnTasksLoaderOptions) {
   const [requestStatus, setRequestStatus] = useState<RequestStatus>('idle')
@@ -172,7 +174,7 @@ export function useColumnTasksLoader({
         setIsFetchingNextPage(true)
       }
 
-      const result = await getColumnTasksAction(projectId, status, page)
+      const result = await getColumnTasksAction(projectId, status, page, searchTerm)
 
       if (requestIdRef.current !== requestId) return
 
@@ -194,30 +196,24 @@ export function useColumnTasksLoader({
 
       setIsFetchingNextPage(false)
     },
-    [onTasksLoaded, projectId, status]
+    [onTasksLoaded, projectId, searchTerm, status]
   )
 
   useEffect(() => {
-    if (!isVisible || hasFetchedRef.current) return
+    if (!isVisible) return
 
     hasFetchedRef.current = true
+    setCurrentPage(0)
+    setTotalCount(null)
+    setLoadedCount(0)
+    setError(null)
 
     const timeoutId = window.setTimeout(() => {
       void fetchColumnTasks(1, 'replace')
     }, 0)
 
     return () => window.clearTimeout(timeoutId)
-  }, [fetchColumnTasks, isVisible])
-
-  useEffect(() => {
-    if (!hasFetchedRef.current || refreshVersion === 0) return
-
-    setCurrentPage(0)
-    setTotalCount(null)
-    setLoadedCount(0)
-    setError(null)
-    void fetchColumnTasks(1, 'replace')
-  }, [fetchColumnTasks, refreshVersion])
+  }, [fetchColumnTasks, isVisible, refreshVersion])
 
   const hasMore = totalCount !== null && loadedCount < totalCount
 
