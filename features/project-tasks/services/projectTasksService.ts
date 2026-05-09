@@ -2,7 +2,7 @@ import { env } from '@/lib/env'
 
 import { parseApiError } from '@/utils/parseApiError'
 // import { toSafeEpicId } from '../utils/toSafeEpicId'
-import { TAddTaskBody, TTask } from '../types'
+import { TAddTaskBody, TTask, TUpdateTaskPatch } from '../types'
 import { PaginatedResponse } from '@/hooks/paginated/types'
 import { COLUMN_PAGE_SIZE, TASKS_PAGE_SIZE } from '../constants'
 
@@ -145,6 +145,27 @@ export const projectTasksService = {
       },
       body: JSON.stringify({ status }),
     })
+
+    if (!response.ok) throw await parseApiError(response)
+  },
+  updateTask: async (
+    taskId: string,
+    patch: TUpdateTaskPatch,
+    accessToken: string
+  ): Promise<void> => {
+    const response = await fetch(
+      `${env.apiUrl}/rest/v1/tasks?id=eq.${encodeURIComponent(taskId)}`,
+      {
+        method: 'PATCH',
+        headers: {
+          apikey: env.anonKey,
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify(patch),
+      }
+    )
 
     if (!response.ok) throw await parseApiError(response)
   },

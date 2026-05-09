@@ -8,6 +8,15 @@ export type TAddTaskBody = {
   due_date?: string | null
 }
 
+export type TUpdateTaskPatch = Partial<{
+  title: string
+  description: string | null
+  assignee_id: string | null
+  due_date: string | null
+  epic_id: string | null
+  status: string
+}>
+
 export type TTaskAssignee = {
   id: string
   name: string

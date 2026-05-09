@@ -9,5 +9,9 @@ export const TASK_STATUS_OPTIONS = [
   { label: 'Done', value: 'DONE' },
 ] as const
 
+export const TASK_STATUS_VALUES = TASK_STATUS_OPTIONS.map(
+  (status) => status.value
+) as [string, ...string[]]
+
 export const TASKS_PAGE_SIZE = 10
 export const COLUMN_PAGE_SIZE = 8
