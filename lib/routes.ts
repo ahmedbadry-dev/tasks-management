@@ -3,6 +3,7 @@ const encodeSegment = (segment: string) => encodeURIComponent(segment)
 export const routes = {
   home: '/',
   invite: '/invite',
+  myStatistics: '/my-statistics',
   auth: {
     signIn: '/sign-in',
     signUp: '/sign-up',
