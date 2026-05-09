@@ -5,6 +5,7 @@ import { parseApiError } from '@/utils/parseApiError'
 import { TAddTaskBody, TTask } from '../types'
 import { PaginatedResponse } from '@/hooks/paginated/types'
 import { COLUMN_PAGE_SIZE, TASKS_PAGE_SIZE } from '../constants'
+import { createApiHeaders } from '@/utils/createApiHeaders'
 
 export const projectTasksService = {
   addNewTask: async (
@@ -13,11 +14,7 @@ export const projectTasksService = {
   ): Promise<void> => {
     const response = await fetch(`${env.apiUrl}/rest/v1/tasks`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: env.anonKey,
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: createApiHeaders(accessToken),
       body: JSON.stringify(body),
     })
 
@@ -32,11 +29,7 @@ export const projectTasksService = {
       `${env.apiUrl}/rest/v1/project_tasks?epic_id=eq.${epicId}`,
       {
         method: 'GET',
-        headers: {
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
+        headers: createApiHeaders(accessToken),
         signal,
       }
     )
@@ -57,11 +50,7 @@ export const projectTasksService = {
       `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}&status=eq.${status}&limit=${COLUMN_PAGE_SIZE}&offset=${offset}&order=created_at.desc`,
       {
         method: 'GET',
-        headers: {
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-          Prefer: 'count=exact',
-        },
+        headers: createApiHeaders(accessToken, { Prefer: 'count=exact' }),
       }
     )
 
@@ -89,11 +78,7 @@ export const projectTasksService = {
       `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}&limit=${TASKS_PAGE_SIZE}&offset=${offset}&order=created_at.desc`,
       {
         method: 'GET',
-        headers: {
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-          Prefer: 'count=exact',
-        },
+        headers: createApiHeaders(accessToken, { Prefer: 'count=exact' }),
         signal,
       }
     )
@@ -115,11 +100,7 @@ export const projectTasksService = {
       `${env.apiUrl}/rest/v1/project_tasks?project_id=eq.${projectId}&id=eq.${taskId}&limit=1`,
       {
         method: 'GET',
-        headers: {
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
+        headers: createApiHeaders(accessToken),
       }
     )
 
@@ -137,12 +118,7 @@ export const projectTasksService = {
   ): Promise<void> => {
     const response = await fetch(`${env.apiUrl}/rest/v1/tasks?id=eq.${taskId}`, {
       method: 'PATCH',
-      headers: {
-        apikey: env.anonKey,
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=minimal',
-      },
+      headers: createApiHeaders(accessToken, { Prefer: 'return=minimal' }),
       body: JSON.stringify({ status }),
     })
 
