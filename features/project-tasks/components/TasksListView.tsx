@@ -1,10 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
-import { usePaginatedFetch } from '@/hooks/usePaginatedFetch'
-import { projectTasksService } from '../services/projectTasksService'
-import { getSession } from '@/features/auth/utils/getSession'
-import { TTask } from '../types'
+import { useEffect } from 'react'
 import { TASKS_PAGE_SIZE } from '../constants'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { Pagination } from '@/shared/components/Pagination'
@@ -33,6 +29,23 @@ export const TasksListView = ({ projectId }: Props) => {
         goToPage,
         retry,
     } = useTasksListFetch({ projectId })
+
+    useEffect(() => {
+        const handleTaskDetailsUpdated = (event: Event) => {
+            const detail = (event as CustomEvent<{ projectId?: string }>).detail
+            if (detail?.projectId && detail.projectId !== projectId) return
+
+            if (isDesktop === false) {
+                goToPage(1)
+                return
+            }
+
+            goToPage(currentPage)
+        }
+
+        window.addEventListener('task-details-updated', handleTaskDetailsUpdated)
+        return () => window.removeEventListener('task-details-updated', handleTaskDetailsUpdated)
+    }, [currentPage, goToPage, isDesktop, projectId])
 
     const hasTasks = tasks.length > 0
 

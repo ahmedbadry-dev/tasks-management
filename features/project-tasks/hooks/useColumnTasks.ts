@@ -23,6 +23,7 @@ type UseColumnTasksLoaderOptions = {
   projectId: string
   status: string
   isVisible: boolean
+  refreshVersion?: number
   onTasksLoaded: (
     status: string,
     tasks: TTask[],
@@ -145,6 +146,7 @@ export function useColumnTasksLoader({
   projectId,
   status,
   isVisible,
+  refreshVersion = 0,
   onTasksLoaded,
 }: UseColumnTasksLoaderOptions) {
   const [requestStatus, setRequestStatus] = useState<RequestStatus>('idle')
@@ -206,6 +208,16 @@ export function useColumnTasksLoader({
 
     return () => window.clearTimeout(timeoutId)
   }, [fetchColumnTasks, isVisible])
+
+  useEffect(() => {
+    if (!hasFetchedRef.current || refreshVersion === 0) return
+
+    setCurrentPage(0)
+    setTotalCount(null)
+    setLoadedCount(0)
+    setError(null)
+    void fetchColumnTasks(1, 'replace')
+  }, [fetchColumnTasks, refreshVersion])
 
   const hasMore = totalCount !== null && loadedCount < totalCount
 

@@ -30,6 +30,7 @@ type Props = {
     status: string
     statusLabel: string
     isVisible: boolean
+    refreshVersion: number
     tasks: TTask[]
     onTasksLoaded: (
         status: string,
@@ -43,6 +44,7 @@ export const TasksBoardColumn = ({
     status,
     statusLabel,
     isVisible,
+    refreshVersion,
     tasks,
     onTasksLoaded,
 }: Props) => {
@@ -57,7 +59,13 @@ export const TasksBoardColumn = ({
         hasInitialError,
         retry,
         loadMore,
-    } = useColumnTasksLoader({ projectId, status, isVisible, onTasksLoaded })
+    } = useColumnTasksLoader({
+        projectId,
+        status,
+        isVisible,
+        refreshVersion,
+        onTasksLoaded,
+    })
     const { sentinelRef } = useColumnInfiniteScroll({
         hasMore,
         isFetchingNextPage,
