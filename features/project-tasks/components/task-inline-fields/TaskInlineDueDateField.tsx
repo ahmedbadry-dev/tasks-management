@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { cn } from '@/utils/cn'
 import { DatePickerPortal } from './DatePickerPortal'
@@ -12,7 +12,7 @@ import {
 } from './shared'
 
 export const TaskInlineDueDateField = ({ task, onSavePatch }: TaskFieldProps) => {
-  const buttonRef = useRef<HTMLButtonElement | null>(null)
+  const [buttonElement, setButtonElement] = useState<HTMLButtonElement | null>(null)
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const dateValue = toDateInputValue(task.due_date)
@@ -46,11 +46,11 @@ export const TaskInlineDueDateField = ({ task, onSavePatch }: TaskFieldProps) =>
   return (
     <div>
       <button
-        ref={buttonRef}
+        ref={setButtonElement}
         type="button"
         onClick={() => setIsEditing(true)}
         disabled={isSaving}
-        className="flex flex-col min-h-10 w-full justify-between rounded-lg px-1 py-1 text-left transition-colors hover:bg-surface-highest/50 focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-70"
+        className="flex flex-col md:flex-row min-h-10 w-full justify-between rounded-lg px-1 py-1 text-left transition-colors hover:bg-surface-highest/50 focus-visible:outline-2 focus-visible:outline-primary disabled:opacity-70"
       >
         <p className="type-label-sm mb-3 text-[12px] text-slate-400">Due Date</p>
         <p className={cn('type-body-md font-semibold text-slate-900', !task.due_date && 'text-slate-500')}>
@@ -60,7 +60,7 @@ export const TaskInlineDueDateField = ({ task, onSavePatch }: TaskFieldProps) =>
 
       {isEditing && (
         <DatePickerPortal
-          anchor={buttonRef.current}
+          anchor={buttonElement}
           selected={selectedDate}
           onSelect={(date) => void handleSelect(date)}
           onClear={() => void handleSelect(undefined)}

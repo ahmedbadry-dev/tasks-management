@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { createPortal } from 'react-dom'
 import { DayPicker } from 'react-day-picker'
 import { getToday } from './shared'
@@ -11,6 +11,12 @@ type Props = {
   onClose: () => void
 }
 
+const MOBILE_BREAKPOINT = 640
+const VIEWPORT_GUTTER = 16
+const subscribeToMounted = () => () => undefined
+const getMountedSnapshot = () => true
+const getServerMountedSnapshot = () => false
+
 export const DatePickerPortal = ({
   anchor,
   selected,
@@ -18,22 +24,34 @@ export const DatePickerPortal = ({
   onClear,
   onClose,
 }: Props) => {
-  const [mounted, setMounted] = useState(false)
-  const [position, setPosition] = useState({ top: 0, left: 0, width: 260 })
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = useSyncExternalStore(
+    subscribeToMounted,
+    getMountedSnapshot,
+    getServerMountedSnapshot
+  )
+  const [position, setPosition] = useState({
+    top: 0,
+    left: 0,
+    width: 260,
+  })
 
   useEffect(() => {
     if (!anchor) return
 
     const updatePosition = () => {
       const rect = anchor.getBoundingClientRect()
+      const isMobile = window.innerWidth < MOBILE_BREAKPOINT
+      const maxWidth = window.innerWidth - VIEWPORT_GUTTER * 2
+      const width = Math.min(Math.max(rect.width, 260), maxWidth)
+      const left = Math.min(
+        Math.max(rect.left, VIEWPORT_GUTTER),
+        window.innerWidth - width - VIEWPORT_GUTTER
+      )
+
       setPosition({
-        top: rect.bottom + 8,
-        left: Math.min(rect.left, window.innerWidth - 288),
-        width: Math.max(rect.width, 260),
+        top: isMobile ? VIEWPORT_GUTTER : rect.bottom + 8,
+        left,
+        width,
       })
     }
 
@@ -52,7 +70,7 @@ export const DatePickerPortal = ({
   return createPortal(
     <div className="fixed inset-0 z-[9998]" onMouseDown={onClose}>
       <div
-        className="fixed z-[9999] rounded-lg border border-slate-200 bg-white p-3 shadow-xl"
+        className="fixed z-[9999] max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-lg border border-slate-200 bg-white p-3 shadow-xl"
         style={{ top: position.top, left: position.left, width: position.width }}
         onMouseDown={(event) => event.stopPropagation()}
       >

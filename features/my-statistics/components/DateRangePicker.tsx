@@ -144,7 +144,14 @@ export const DateRangePicker = ({
       )}
 
       {isOpen && (
-        <div className="absolute left-0 top-full z-30 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-lg bg-white p-4 shadow-card ring-1 ring-surface-highest">
+        <div
+          className={cn(
+            'z-30 rounded-lg bg-white p-4 shadow-card ring-1 ring-surface-highest',
+            variant === 'field'
+              ? 'fixed left-4 right-4 top-28 max-h-[calc(100dvh-8rem)] overflow-y-auto sm:absolute sm:left-0 sm:right-auto sm:top-full sm:mt-2 sm:w-[min(22rem,calc(100vw-2rem))]'
+              : 'absolute left-0 top-full mt-2 w-[min(22rem,calc(100vw-2rem))]'
+          )}
+        >
           <DayPicker
             mode="range"
             selected={draftRange}
