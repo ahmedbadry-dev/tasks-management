@@ -9,16 +9,17 @@ import { getTasksListAction } from '../actions/getTasksListAction'
 
 type Options = {
   projectId: string
+  searchTerm?: string
 }
 
-export function useTasksListFetch({ projectId }: Options) {
+export function useTasksListFetch({ projectId, searchTerm = '' }: Options) {
   const fetchFn = useCallback(
     async (page: number, signal: AbortSignal) => {
-      const result = await getTasksListAction(projectId, page)
+      const result = await getTasksListAction(projectId, page, searchTerm)
       if (!result.success) throw new Error(result.error)
       return result.data
     },
-    [projectId]
+    [projectId, searchTerm]
   )
 
   return usePaginatedFetch<TTask>({ fetchFn, limit: TASKS_PAGE_SIZE })

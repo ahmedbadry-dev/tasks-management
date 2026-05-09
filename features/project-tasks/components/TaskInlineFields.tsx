@@ -1,0 +1,6 @@
+export { TaskInlineAssigneeField } from './task-inline-fields/TaskInlineAssigneeField'
+export { TaskInlineDescriptionField } from './task-inline-fields/TaskInlineDescriptionField'
+export { TaskInlineDueDateField } from './task-inline-fields/TaskInlineDueDateField'
+export { TaskInlineEpicField } from './task-inline-fields/TaskInlineEpicField'
+export { TaskInlineStatusField } from './task-inline-fields/TaskInlineStatusField'
+export { TaskInlineTitleField } from './task-inline-fields/TaskInlineTitleField'

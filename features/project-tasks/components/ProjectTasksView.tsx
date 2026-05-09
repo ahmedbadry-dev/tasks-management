@@ -1,6 +1,7 @@
 'use client'
 
 import { useSearchParams, useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 
 import { TasksBoardView } from './TasksBoardView'
@@ -8,6 +9,7 @@ import { TasksListView } from './TasksListView'
 import { TasksMobileView } from './TasksMobileView'
 import { useDesktopBreakpoint } from '@/hooks/paginated/useDesktopBreakpoint'
 import { TasksPageHeader } from './TasksPageHeader'
+import { useDebouncedSearch } from '@/shared/hooks/useDebouncedSearch'
 
 type Props = {
     projectId: string
@@ -19,6 +21,10 @@ export const ProjectTasksView = ({ projectId }: Props) => {
     const searchParams = useSearchParams()
     const router = useRouter()
     const isDesktop = useDesktopBreakpoint(992)
+    const [searchTerm, setSearchTerm] = useState('')
+    const { inputValue, handleChange } = useDebouncedSearch((term) => {
+        setSearchTerm(term)
+    })
 
     const view = (searchParams.get('view') ?? 'board') as TaskView
 
@@ -37,11 +43,13 @@ export const ProjectTasksView = ({ projectId }: Props) => {
             <TasksPageHeader
                 currentView={view}
                 onViewChange={handleViewChange}
+                searchValue={inputValue}
+                onSearchChange={handleChange}
             />
             {view === 'board' ? (
-                <TasksBoardView projectId={projectId} />
+                <TasksBoardView projectId={projectId} searchTerm={searchTerm} />
             ) : (
-                <TasksListView projectId={projectId} />
+                <TasksListView projectId={projectId} searchTerm={searchTerm} />
             )}
         </div>
     )

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { TASK_STATUS_OPTIONS } from '../constants'
 import { TasksBoardColumn } from './TasksBoardColumn'
 import { TTask } from '../types'
@@ -15,14 +15,16 @@ import { useVisibleBoardColumns } from '../hooks/useVisibleBoardColumns'
 
 type Props = {
     projectId: string
+    searchTerm?: string
 }
 
-export const TasksBoardView = ({ projectId }: Props) => {
+export const TasksBoardView = ({ projectId, searchTerm = '' }: Props) => {
     const statusIds = useMemo(
         () => TASK_STATUS_OPTIONS.map((status) => status.value),
         []
     )
     const scrollContainerRef = useRef<HTMLDivElement | null>(null)
+    const [refreshVersion, setRefreshVersion] = useState(0)
     const [columnTasksMap, setColumnTasksMap] = useState<Record<string, TTask[]>>(
         () =>
             Object.fromEntries(
@@ -69,6 +71,26 @@ export const TasksBoardView = ({ projectId }: Props) => {
         []
     )
 
+    useEffect(() => {
+        const handleTaskDetailsUpdated = (event: Event) => {
+            const detail = (event as CustomEvent<{ projectId?: string }>).detail
+            if (detail?.projectId && detail.projectId !== projectId) return
+
+            setRefreshVersion((version) => version + 1)
+        }
+
+        window.addEventListener('task-details-updated', handleTaskDetailsUpdated)
+        return () => window.removeEventListener('task-details-updated', handleTaskDetailsUpdated)
+    }, [projectId])
+
+    useEffect(() => {
+        setColumnTasksMap(
+            Object.fromEntries(
+                TASK_STATUS_OPTIONS.map((status) => [status.value, [] as TTask[]])
+            )
+        )
+    }, [searchTerm])
+
     return (
         <DndContext
             sensors={sensors}
@@ -93,6 +115,8 @@ export const TasksBoardView = ({ projectId }: Props) => {
                             status={status.value}
                             statusLabel={status.label}
                             isVisible={visibleColumns.has(status.value)}
+                            refreshVersion={refreshVersion}
+                            searchTerm={searchTerm}
                             tasks={columnTasksMap[status.value] ?? []}
                             onTasksLoaded={handleTasksLoaded}
                         />

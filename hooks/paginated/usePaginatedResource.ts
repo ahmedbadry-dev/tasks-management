@@ -43,8 +43,9 @@ export function usePaginatedResource<T>({
       activeControllerRef.current = controller
 
       if (mode === 'replace') {
+        setItems([])
         setStatus('loading')
-        setIsFetchingPage(itemsRef.current.length > 0)
+        setIsFetchingPage(true)
       } else {
         setIsFetchingPage(true)
       }
