@@ -1,6 +1,5 @@
 import { RequestStatus, TEpicDetails, TMember } from '../types'
 import { formatServerDateTime } from '@/features/projects/utils/formatServerDateTime'
-import { EpicsInlineTitleField } from './EpicsInlineTitleField'
 import { EpicsInlineDescriptionField } from './EpicsInlineDescriptionField'
 import { EpicsInlineAssigneeField } from './EpicsInlineAssigneeField'
 import { EpicsInlineDeadlineField } from './EpicsInlineDeadlineField'
@@ -83,9 +82,6 @@ export const EpicsModelDetails = ({
           </button>
         </div>
       )}
-
-      {/* Independent field component with isolated title update logic */}
-      <EpicsInlineTitleField epicId={selectedEpic.id} initialTitle={selectedEpic.title ?? ''} />
 
       {/* Independent field component with isolated description update logic */}
       <EpicsInlineDescriptionField

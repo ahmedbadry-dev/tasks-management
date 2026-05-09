@@ -1,18 +1,19 @@
 import { CloseIcon, ColumnsIcon } from '@/shared/components/icons'
+import { EpicsInlineTitleField } from './EpicsInlineTitleField'
 
 type Props = {
   dialogTitleId: string
+  epicId: string | null
   epicCode: string
   epicTitle: string
-  mobileEpicTitle: string
   onClose: () => void
 }
 
 export const EpicsModelHeader = ({
   dialogTitleId,
+  epicId,
   epicCode,
   epicTitle,
-  mobileEpicTitle,
   onClose,
 }: Props) => {
   return (
@@ -24,13 +25,25 @@ export const EpicsModelHeader = ({
           </span>
           <span>{epicCode}</span>
         </div>
-        <h2 id={dialogTitleId} className="min-w-0 pr-2">
-          <span className="heading-2 hidden break-words whitespace-normal md:block">
-            {epicTitle}
-          </span>
-          <span className="heading-3 break-words whitespace-normal md:hidden">
-            {mobileEpicTitle}
-          </span>
+        <h2 className="min-w-0 pr-2">
+          {epicId ? (
+            <EpicsInlineTitleField
+              key={epicId}
+              epicId={epicId}
+              initialTitle={epicTitle}
+              variant="header"
+              headingId={dialogTitleId}
+            />
+          ) : (
+            <>
+              <span id={dialogTitleId} className="heading-2 hidden break-words whitespace-normal md:block">
+                {epicTitle}
+              </span>
+              <span className="heading-3 break-words whitespace-normal md:hidden">
+                {epicTitle}
+              </span>
+            </>
+          )}
         </h2>
       </div>
 
