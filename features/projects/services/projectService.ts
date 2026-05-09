@@ -8,6 +8,7 @@ import {
 import { parseApiError } from '@/utils/parseApiError'
 import { PROJECTS_PAGE_SIZE } from '../constants'
 import { toSafeProjectId } from '../utils/toSafeProjectId'
+import { createApiHeaders } from '@/utils/createApiHeaders'
 
 export const projectService = {
   getProjects: async (
@@ -21,11 +22,7 @@ export const projectService = {
       `${env.apiUrl}/rest/v1/rpc/get_projects?limit=${PROJECTS_PAGE_SIZE}&offset=${offset}`,
       {
         method: 'GET',
-        headers: {
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-          Prefer: 'count=exact',
-        },
+        headers: createApiHeaders(accessToken, { Prefer: 'count=exact' }),
         signal,
       }
     )
@@ -45,11 +42,7 @@ export const projectService = {
   ): Promise<void> => {
     const response = await fetch(`${env.apiUrl}/rest/v1/projects`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: env.anonKey,
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: createApiHeaders(accessToken),
       body: JSON.stringify(body),
     })
 
@@ -66,11 +59,7 @@ export const projectService = {
       `${env.apiUrl}/rest/v1/projects?id=eq.${safeProjectId}`,
       {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: createApiHeaders(accessToken),
         body: JSON.stringify(body),
       }
     )
@@ -85,11 +74,7 @@ export const projectService = {
       `${env.apiUrl}/rest/v1/projects?id=eq.${safeProjectId}`,
       {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: createApiHeaders(accessToken),
       }
     )
     if (!response.ok) throw await parseApiError(response)

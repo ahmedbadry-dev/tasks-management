@@ -2,6 +2,7 @@ import { env } from '@/lib/env'
 import { TProjectMember } from '../types'
 import { toSafeProjectId } from '@/features/projects/utils/toSafeProjectId'
 import { parseApiError } from '@/utils/parseApiError'
+import { createApiHeaders } from '@/utils/createApiHeaders'
 
 export type InviteMemberRpcBody = {
   p_email: string
@@ -24,11 +25,7 @@ export const projectMembersService = {
       `${env.apiUrl}/rest/v1/get_project_members?project_id=eq.${safeProjectId}`,
       {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: env.anonKey,
-          Authorization: `Bearer ${accessToken}`,
-        },
+        headers: createApiHeaders(accessToken),
       }
     )
 
@@ -42,11 +39,7 @@ export const projectMembersService = {
   ): Promise<void> => {
     const response = await fetch(`${env.apiUrl}/rest/v1/rpc/invite_member`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: env.anonKey,
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: createApiHeaders(accessToken),
       body: JSON.stringify(body),
     })
 
@@ -58,11 +51,7 @@ export const projectMembersService = {
   ): Promise<unknown> => {
     const response = await fetch(`${env.apiUrl}/rest/v1/rpc/accept_invitation`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: env.anonKey,
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: createApiHeaders(accessToken),
       body: JSON.stringify(body),
     })
 
