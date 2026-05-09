@@ -25,8 +25,8 @@ export const routes = {
       params?: { epicId?: string; status?: string }
     ) => {
       const query = new URLSearchParams()
-      if (params?.epicId) query.set('epicId', encodeSegment(params.epicId))
-      if (params?.status) query.set('status', encodeSegment(params.status))
+      if (params?.epicId) query.set('epicId', params.epicId)
+      if (params?.status) query.set('status', params.status)
       const qs = query.toString()
       return `/project/${encodeSegment(projectId)}/tasks/new${qs ? `?${qs}` : ''}`
     },
