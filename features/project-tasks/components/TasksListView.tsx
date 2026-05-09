@@ -12,9 +12,10 @@ import { TasksMobileCard } from './TasksMobileCard'
 
 type Props = {
     projectId: string
+    searchTerm?: string
 }
 
-export const TasksListView = ({ projectId }: Props) => {
+export const TasksListView = ({ projectId, searchTerm = '' }: Props) => {
     const {
         items: tasks,
         status,
@@ -28,7 +29,7 @@ export const TasksListView = ({ projectId }: Props) => {
         loaderRef,
         goToPage,
         retry,
-    } = useTasksListFetch({ projectId })
+    } = useTasksListFetch({ projectId, searchTerm })
 
     useEffect(() => {
         const handleTaskDetailsUpdated = (event: Event) => {
@@ -48,15 +49,16 @@ export const TasksListView = ({ projectId }: Props) => {
     }, [currentPage, goToPage, isDesktop, projectId])
 
     const hasTasks = tasks.length > 0
+    const isSearching = searchTerm.length > 0
 
-    if (isDesktop === null || isInitialLoading) {
+    if (isDesktop === null || isInitialLoading || (isDesktop && isFetchingPage)) {
         return <TasksListSkeleton />
     }
 
     if (status === 'failed' && !hasTasks) {
         return (
             <ErrorState
-                title="Failed to load tasks"
+                title={isSearching ? 'Failed to search tasks' : 'Failed to load tasks'}
                 message={error ?? 'Please try again.'}
                 onRetry={retry}
             />
@@ -66,12 +68,27 @@ export const TasksListView = ({ projectId }: Props) => {
     return (
         <div className="flex flex-col gap-4">
             {isDesktop ? (
-                <TasksListTable tasks={tasks} />
+                hasTasks ? (
+                    <TasksListTable tasks={tasks} />
+                ) : (
+                    <p className="type-body-md py-10 text-center text-slate-400">
+                        {isSearching
+                            ? 'No tasks found matching your search'
+                            : 'No tasks found for this project'}
+                    </p>
+                )
             ) : (
                 <div className="flex flex-col gap-3">
                     {tasks.map((task) => (
                         <TasksMobileCard key={task.id} {...task} />
                     ))}
+                    {!hasTasks ? (
+                        <p className="type-body-md py-10 text-center text-slate-400">
+                            {isSearching
+                                ? 'No tasks found matching your search'
+                                : 'No tasks found for this project'}
+                        </p>
+                    ) : null}
                     {!isDesktop && hasTasks && <div ref={loaderRef} className="h-10" aria-hidden />}
                 </div>
             )}

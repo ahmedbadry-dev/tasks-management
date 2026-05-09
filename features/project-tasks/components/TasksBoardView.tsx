@@ -15,9 +15,10 @@ import { useVisibleBoardColumns } from '../hooks/useVisibleBoardColumns'
 
 type Props = {
     projectId: string
+    searchTerm?: string
 }
 
-export const TasksBoardView = ({ projectId }: Props) => {
+export const TasksBoardView = ({ projectId, searchTerm = '' }: Props) => {
     const statusIds = useMemo(
         () => TASK_STATUS_OPTIONS.map((status) => status.value),
         []
@@ -82,6 +83,14 @@ export const TasksBoardView = ({ projectId }: Props) => {
         return () => window.removeEventListener('task-details-updated', handleTaskDetailsUpdated)
     }, [projectId])
 
+    useEffect(() => {
+        setColumnTasksMap(
+            Object.fromEntries(
+                TASK_STATUS_OPTIONS.map((status) => [status.value, [] as TTask[]])
+            )
+        )
+    }, [searchTerm])
+
     return (
         <DndContext
             sensors={sensors}
@@ -107,6 +116,7 @@ export const TasksBoardView = ({ projectId }: Props) => {
                             statusLabel={status.label}
                             isVisible={visibleColumns.has(status.value)}
                             refreshVersion={refreshVersion}
+                            searchTerm={searchTerm}
                             tasks={columnTasksMap[status.value] ?? []}
                             onTasksLoaded={handleTasksLoaded}
                         />

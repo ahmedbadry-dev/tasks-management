@@ -31,6 +31,7 @@ type Props = {
     statusLabel: string
     isVisible: boolean
     refreshVersion: number
+    searchTerm?: string
     tasks: TTask[]
     onTasksLoaded: (
         status: string,
@@ -45,6 +46,7 @@ export const TasksBoardColumn = ({
     statusLabel,
     isVisible,
     refreshVersion,
+    searchTerm = '',
     tasks,
     onTasksLoaded,
 }: Props) => {
@@ -57,6 +59,7 @@ export const TasksBoardColumn = ({
         isInitialLoading,
         isFetchingNextPage,
         hasInitialError,
+        error,
         retry,
         loadMore,
     } = useColumnTasksLoader({
@@ -64,6 +67,7 @@ export const TasksBoardColumn = ({
         status,
         isVisible,
         refreshVersion,
+        searchTerm,
         onTasksLoaded,
     })
     const { sentinelRef } = useColumnInfiniteScroll({
@@ -80,6 +84,9 @@ export const TasksBoardColumn = ({
         hasInitialError,
         hasMore,
     })
+
+    const isSearching = searchTerm.length > 0
+    const hasPaginationError = Boolean(error) && !hasInitialError && tasks.length > 0
 
     const handleAddTask = () => {
         router.push(routes.project.newTask(projectId, { status }))
@@ -138,13 +145,17 @@ export const TasksBoardColumn = ({
                         </>
                     ) : hasInitialError ? (
                         <div className="flex flex-col items-center gap-2 p-3 text-center">
-                            <p className="type-label-sm text-error">Failed to load tasks</p>
+                            <p className="type-label-sm text-error">
+                                {isSearching ? 'Failed to search tasks' : 'Failed to load tasks'}
+                            </p>
                             <button onClick={retry} className="btn btn-ghost px-2 py-1 text-xs text-primary">
                                 Retry
                             </button>
                         </div>
                     ) : tasks.length === 0 ? (
-                        <p className="type-label-sm p-3 text-center text-slate-400">No tasks</p>
+                        <p className="type-label-sm p-3 text-center text-slate-400">
+                            {isSearching ? 'No tasks found matching your search' : 'No tasks'}
+                        </p>
                     ) : (
                         <SortableContext
                             items={tasks.map((task) => task.id)}
@@ -159,6 +170,16 @@ export const TasksBoardColumn = ({
                     {isFetchingNextPage ? (
                         <div className="flex justify-center py-2">
                             <Spinner size="sm" label={`Loading more ${statusLabel} tasks`} />
+                        </div>
+                    ) : null}
+                    {hasPaginationError ? (
+                        <div className="flex flex-col items-center gap-2 py-2 text-center">
+                            <p className="type-label-sm text-error">
+                                {isSearching ? 'Failed to search tasks' : 'Failed to load more tasks'}
+                            </p>
+                            <button onClick={retry} className="btn btn-ghost px-2 py-1 text-xs text-primary">
+                                Retry
+                            </button>
                         </div>
                     ) : null}
                 </div>
