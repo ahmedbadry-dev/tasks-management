@@ -6,15 +6,13 @@ import {
   TSignUpBody,
 } from '../types'
 import { parseApiError } from '@/utils/parseApiError'
+import { createApiHeaders } from '@/utils/createApiHeaders'
 
 export const authService = {
   signUp: async (body: TSignUpBody) => {
     const response = await fetch(`${env.apiUrl}/auth/v1/signup`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: env.anonKey,
-      },
+      headers: createApiHeaders(),
       body: JSON.stringify(body),
     })
 
@@ -27,10 +25,7 @@ export const authService = {
       `${env.apiUrl}/auth/v1/token?grant_type=password`,
       {
         method: 'POST',
-        headers: {
-          'content-Type': 'application/json',
-          apikey: env.anonKey,
-        },
+        headers: createApiHeaders(),
         body: JSON.stringify(body),
       }
     )
@@ -42,11 +37,7 @@ export const authService = {
   logout: async (accessToken: string) => {
     const response = await fetch(`${env.apiUrl}/auth/v1/logout`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        apikey: env.anonKey,
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: createApiHeaders(accessToken),
     })
 
     if (!response.ok) throw await parseApiError(response)
@@ -58,10 +49,7 @@ export const authService = {
       `${env.apiUrl}/auth/v1/token?grant_type=refresh_token`,
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: env.anonKey,
-        },
+        headers: createApiHeaders(),
         body: JSON.stringify(body),
       }
     )
@@ -74,11 +62,7 @@ export const authService = {
     const response = await fetch(`${env.apiUrl}/auth/v1/user`, {
       method: 'GET',
       cache: 'no-store',
-      headers: {
-        'content-Type': 'application/json',
-        apikey: env.anonKey,
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers: createApiHeaders(accessToken),
     })
 
     if (!response.ok) throw await parseApiError(response)
@@ -88,10 +72,7 @@ export const authService = {
   forgotPassword: async (body: TForgotPassword) => {
     const response = await fetch(`${env.apiUrl}/auth/v1/recover`, {
       method: 'POST',
-      headers: {
-        'content-Type': 'application/json',
-        apikey: env.anonKey,
-      },
+      headers: createApiHeaders(),
       body: JSON.stringify(body),
     })
 
