@@ -1,13 +1,12 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { MemberAvatar } from '@/features/project-members/components/MemberAvatar'
-import { updateProjectEpicAction } from '../actions/updateProjectEpicAction'
 import { RequestStatus, TMember } from '../types'
-import { useAppDispatch } from '@/store/hooks'
-import { upsertEpicPatch } from '@/store/projectEpicPatchesStore/projectEpicPatchesSlice'
+import { useUpdateEpic } from '../hooks/useUpdateEpic'
 
 type Props = {
   epicId: string
+  projectId: string
   initialAssigneeId: string | null
   initialAssigneeName: string
   members: TMember[]
@@ -25,6 +24,7 @@ type AssigneeState = {
 
 export const EpicsInlineAssigneeField = ({
   epicId,
+  projectId,
   initialAssigneeId,
   initialAssigneeName,
   members,
@@ -32,7 +32,7 @@ export const EpicsInlineAssigneeField = ({
   membersError,
   onLoadMembers,
 }: Props) => {
-  const dispatch = useAppDispatch()
+  const updateEpicMutation = useUpdateEpic(epicId, projectId)
 
   // Assignee is shown as display mode first, then turns into picker mode on click.
   const [isEditing, setIsEditing] = useState(false)
@@ -72,33 +72,32 @@ export const EpicsInlineAssigneeField = ({
       setValue({ id: nextId, name: nextName })
       setIsSaving(true)
 
-      const result = await updateProjectEpicAction(epicId, { assignee_id: nextId })
-
-      if (!result.ok) {
+      try {
+        await updateEpicMutation.mutateAsync({
+          patch: { assignee_id: nextId },
+          optimisticEpic: {
+            assignee: nextId
+              ? {
+                  sub: nextId,
+                  name: nextName,
+                  email: '',
+                  department: null,
+                }
+              : null,
+          },
+        })
+      } catch {
         setValue(previousValue)
         setIsEditing(false)
         setIsSaving(false)
-        toast.error(UPDATE_ERROR_MESSAGE)
         return
       }
 
       setStableValue({ id: nextId, name: nextName })
-      dispatch(
-        upsertEpicPatch({
-          epicId,
-          patch: {
-            assignee: {
-              id: nextId,
-              name: nextName,
-            },
-          },
-        })
-      )
       setIsEditing(false)
       setIsSaving(false)
-      toast.success('Epic updated successfully!')
     },
-    [dispatch, epicId, isSaving, stableValue]
+    [isSaving, stableValue, updateEpicMutation]
   )
 
   const canShowList = isEditing && membersStatus === 'succeeded'

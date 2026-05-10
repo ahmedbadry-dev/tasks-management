@@ -9,11 +9,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Select } from '@/shared/components/Select';
 import { AddProjectEpicSchema, TAddProjectEpicSchema } from '../validations/AddProjectEpicSchema';
-import { addProjectEpicAction } from '../actions/addProjectEpicAction';
 import { TMember } from '../types';
 import { toast } from 'sonner';
 import { routes } from '@/lib/routes';
 import { Spinner } from '@/shared/components/Spinner';
+import { useAddEpic } from '../hooks/useAddEpic';
 
 type TAddProjectEpicFormProps = {
     projectId: string
@@ -25,6 +25,7 @@ type TAddProjectEpicFormProps = {
 export const AddProjectEpicForm = ({ members = [], projectId }: TAddProjectEpicFormProps) => {
     const [isCanceling, setIsCanceling] = useState(false)
     const router = useRouter()
+    const addEpicMutation = useAddEpic(projectId)
 
     const { register, handleSubmit, formState: { errors, isSubmitting }, setError, clearErrors } = useForm<TAddProjectEpicSchema>({
         resolver: zodResolver(AddProjectEpicSchema),
@@ -42,20 +43,20 @@ export const AddProjectEpicForm = ({ members = [], projectId }: TAddProjectEpicF
     const onSubmit: SubmitHandler<TAddProjectEpicSchema> = async (data) => {
         clearErrors('root')
 
-        const result = await addProjectEpicAction({
-            project_id: projectId,
-            title: data.title,
-            description: data.description ?? null,
-            assignee_id: data.assignee_id,
-            deadline: data.deadline,
-        })
-
-        if (result.ok) {
+        try {
+            await addEpicMutation.mutateAsync({
+                project_id: projectId,
+                title: data.title,
+                description: data.description ?? null,
+                assignee_id: data.assignee_id,
+                deadline: data.deadline,
+            })
             toast.success('Epic created successfully!')
             router.push(routes.project.epics(projectId))
-        } else {
-            toast.error(result.error)
-            setError('root', { message: result.error })
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to create epic'
+            toast.error(message)
+            setError('root', { message })
         }
     }
 
@@ -135,7 +136,7 @@ export const AddProjectEpicForm = ({ members = [], projectId }: TAddProjectEpicF
                             <button
                                 type="button"
                                 className="btn btn-ghost mt-2 max-sm:w-full"
-                                disabled={isSubmitting || isCanceling}
+                                disabled={isSubmitting || addEpicMutation.isPending || isCanceling}
                                 onClick={handleCancel}
                             >
                                 {isCanceling ? (
@@ -149,9 +150,9 @@ export const AddProjectEpicForm = ({ members = [], projectId }: TAddProjectEpicF
                             <button
                                 type="submit"
                                 className="btn btn-primary mt-2 max-sm:w-full "
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || addEpicMutation.isPending}
                             >
-                                {isSubmitting ? (
+                                {isSubmitting || addEpicMutation.isPending ? (
                                     <span className="inline-flex items-center gap-2">
                                         <Spinner size="sm" label="Creating epic" className="border-white/40 border-t-white" />
                                         <span>Create Epic</span>

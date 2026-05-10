@@ -6,7 +6,7 @@ import { EpicsInlineDeadlineField } from './EpicsInlineDeadlineField'
 import { EpicsCreatedByField } from './EpicsCreatedByField'
 import { EpicsCreatedAtField } from './EpicsCreatedAtField'
 import { EpicTasksList } from '@/features/project-tasks/components/EpicTasksList'
-import { useEpicTasks } from '@/features/project-tasks/hooks/useEpicTasks'
+import { useEpicTasksQuery } from '@/features/project-tasks/hooks/useEpicTasksQuery'
 import { useRouter } from 'next/navigation'
 import { routes } from '@/lib/routes'
 import { PlusIcon } from '@/shared/components/icons'
@@ -50,10 +50,17 @@ export const EpicsModelDetails = ({
     : '-'
   const router = useRouter()
   const epicId = selectedEpic.id
-  const { tasks, status, error, retry } = useEpicTasks({
-    isOpen: true,
-    epicId,
-  })
+  const epicTasksQuery = useEpicTasksQuery(epicId, true)
+  const tasks = epicTasksQuery.data ?? []
+  const status: RequestStatus = epicTasksQuery.isError
+    ? 'failed'
+    : epicTasksQuery.isLoading
+      ? 'loading'
+      : epicTasksQuery.isSuccess
+        ? 'succeeded'
+        : 'idle'
+  const error = epicTasksQuery.error?.message ?? null
+  const retry = () => epicTasksQuery.refetch()
 
 
 
@@ -86,6 +93,7 @@ export const EpicsModelDetails = ({
       {/* Independent field component with isolated description update logic */}
       <EpicsInlineDescriptionField
         epicId={selectedEpic.id}
+        projectId={selectedEpic.project_id}
         initialDescription={selectedEpic.description ?? ''}
       />
 
@@ -98,6 +106,7 @@ export const EpicsModelDetails = ({
 
         <EpicsInlineAssigneeField
           epicId={selectedEpic.id}
+          projectId={selectedEpic.project_id}
           initialAssigneeId={selectedEpic.assignee?.sub ?? null}
           initialAssigneeName={selectedEpic.assignee?.name ?? 'Unassigned'}
           members={members}
@@ -108,6 +117,7 @@ export const EpicsModelDetails = ({
 
         <EpicsInlineDeadlineField
           epicId={selectedEpic.id}
+          projectId={selectedEpic.project_id}
           initialDeadline={toDateInputValue(selectedEpic.deadline)}
         />
 
