@@ -7,11 +7,7 @@ import { TaskDetailsModal } from '@/features/project-tasks/components/TaskDetail
 import { InviteMemberModal } from '@/features/project-members/components/InviteMemberModal'
 // import { TaskDetailsModal } from ...
 
-type Props = {
-    accessToken: string
-}
-
-export const ModalHost = ({ accessToken }: Props) => {
+export const ModalHost = () => {
     const dispatch = useAppDispatch()
     const isOpen = useAppSelector(selectIsModalOpen)
     const modalType = useAppSelector(selectModalType)
@@ -29,7 +25,6 @@ export const ModalHost = ({ accessToken }: Props) => {
                 isOpen
                 epicId={epicPayload.epicId}
                 projectId={epicPayload.projectId}
-                accessToken={accessToken}
                 onClose={onClose}
             />
         )

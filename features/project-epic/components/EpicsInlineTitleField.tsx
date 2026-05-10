@@ -1,11 +1,10 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import { updateProjectEpicAction } from '../actions/updateProjectEpicAction'
-import { useAppDispatch } from '@/store/hooks'
-import { upsertEpicPatch } from '@/store/projectEpicPatchesStore/projectEpicPatchesSlice'
+import { useUpdateEpic } from '../hooks/useUpdateEpic'
 
 type Props = {
   epicId: string
+  projectId: string
   initialTitle: string
   variant?: 'field' | 'header'
   headingId?: string
@@ -15,11 +14,12 @@ const UPDATE_ERROR_MESSAGE = 'Failed to update epic. Please try again.'
 
 export const EpicsInlineTitleField = ({
   epicId,
+  projectId,
   initialTitle,
   variant = 'field',
   headingId,
 }: Props) => {
-  const dispatch = useAppDispatch()
+  const updateEpicMutation = useUpdateEpic(epicId, projectId)
 
   // `value` is the live value being edited by the user.
   const [value, setValue] = useState(initialTitle)
@@ -51,20 +51,20 @@ export const EpicsInlineTitleField = ({
     setValue(nextTitle)
     setIsSaving(true)
 
-    const result = await updateProjectEpicAction(epicId, { title: nextTitle })
-
-    if (!result.ok) {
+    try {
+      await updateEpicMutation.mutateAsync({
+        patch: { title: nextTitle },
+        optimisticEpic: { title: nextTitle },
+      })
+    } catch {
       setValue(previousTitle)
-      toast.error(UPDATE_ERROR_MESSAGE)
       setIsSaving(false)
       return
     }
 
     setStableValue(nextTitle)
-    dispatch(upsertEpicPatch({ epicId, patch: { title: nextTitle } }))
-    toast.success('Epic updated successfully!')
     setIsSaving(false)
-  }, [dispatch, epicId, isSaving, stableValue, value])
+  }, [isSaving, stableValue, updateEpicMutation, value])
 
   const input = (
     <input

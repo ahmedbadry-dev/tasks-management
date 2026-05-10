@@ -32,10 +32,6 @@ export const TaskInlineEpicField = ({
   const [isBadgeMenuOpen, setIsBadgeMenuOpen] = useState(false)
   const badgeRef = useRef<HTMLButtonElement | null>(null)
 
-  useEffect(() => {
-    onLoadEpics()
-  }, [onLoadEpics])
-
   const options = useMemo<SelectOption[]>(
     () => [
       { label: 'No epic', value: '' },
@@ -92,7 +88,10 @@ export const TaskInlineEpicField = ({
           ref={badgeRef}
           type="button"
           disabled={isSaving}
-          onClick={() => setIsBadgeMenuOpen(true)}
+          onClick={() => {
+            onLoadEpics()
+            setIsBadgeMenuOpen(true)
+          }}
           className="inline-flex items-center gap-1 rounded-full bg-blue-200 px-3 py-1 text-[12px] font-semibold text-slate-700"
         >
           <LayersIcon size={12} />
@@ -168,6 +167,7 @@ export const TaskInlineEpicField = ({
           isLoading={epicsStatus === 'loading'}
           options={options}
           value={selectedOption}
+          onMenuOpen={onLoadEpics}
           onChange={(option: SingleValue<SelectOption>) => {
             if (!option) return
             void saveEpic(option.value || null)

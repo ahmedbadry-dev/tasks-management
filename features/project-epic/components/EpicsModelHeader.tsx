@@ -4,6 +4,7 @@ import { EpicsInlineTitleField } from './EpicsInlineTitleField'
 type Props = {
   dialogTitleId: string
   epicId: string | null
+  projectId: string | null
   epicCode: string
   epicTitle: string
   onClose: () => void
@@ -12,6 +13,7 @@ type Props = {
 export const EpicsModelHeader = ({
   dialogTitleId,
   epicId,
+  projectId,
   epicCode,
   epicTitle,
   onClose,
@@ -30,6 +32,7 @@ export const EpicsModelHeader = ({
             <EpicsInlineTitleField
               key={epicId}
               epicId={epicId}
+              projectId={projectId ?? ''}
               initialTitle={epicTitle}
               variant="header"
               headingId={dialogTitleId}

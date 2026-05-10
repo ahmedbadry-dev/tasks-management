@@ -8,11 +8,11 @@ import { AddProjectFormSchema, TAddProjectFormSchema } from '../validations/AddP
 import { AddUserIcon, BellIcon } from '@/shared/components/icons';
 import { Textarea } from '@/shared/components/Textarea';
 import { useState } from 'react';
-import { addProjectAction } from '../actions/addProjectAction';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { routes } from '@/lib/routes';
 import { Spinner } from '@/shared/components/Spinner';
+import { useAddProject } from '../hooks/useAddProject';
 
 
 
@@ -21,8 +21,9 @@ import { Spinner } from '@/shared/components/Spinner';
 export const AddProjectForm = () => {
     const [isCanceling, setIsCanceling] = useState(false)
     const router = useRouter()
+    const addProjectMutation = useAddProject()
 
-    const { register, handleSubmit, formState: { errors, isSubmitting }, setError, reset } = useForm<TAddProjectFormSchema>({
+    const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<TAddProjectFormSchema>({
         resolver: zodResolver(AddProjectFormSchema),
         defaultValues: {
             name: '',
@@ -53,18 +54,17 @@ export const AddProjectForm = () => {
 
 
     const onSubmit: SubmitHandler<TAddProjectFormSchema> = async (data) => {
-        const result = await addProjectAction({
-            name: data.name,
-            description: data.description ?? null,
-        })
-
-
-        if (result.ok) {
+        try {
+            await addProjectMutation.mutateAsync({
+                name: data.name,
+                description: data.description ?? null,
+            })
             toast.success('Project created successfully!')
             router.push(routes.project.list)
-        } else {
-            toast.error(result.error)
-            setError('root', { message: result.error })
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to create project'
+            toast.error(message)
+            setError('root', { message })
         }
     }
 
@@ -122,7 +122,7 @@ export const AddProjectForm = () => {
                             <button
                                 type="button"
                                 className="btn btn-ghost mt-2 max-sm:w-full"
-                                disabled={isSubmitting || isCanceling}
+                                disabled={isSubmitting || addProjectMutation.isPending || isCanceling}
                                 onClick={handleCancel}
                             >
                                 {isCanceling ? (
@@ -136,9 +136,9 @@ export const AddProjectForm = () => {
                             <button
                                 type="submit"
                                 className="btn btn-primary mt-2 max-sm:w-full "
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || addProjectMutation.isPending}
                             >
-                                {isSubmitting ? (
+                                {isSubmitting || addProjectMutation.isPending ? (
                                     <span className="inline-flex items-center gap-2">
                                         <Spinner size="sm" label="Creating project" className="border-white/40 border-t-white" />
                                         <span>Create Project</span>

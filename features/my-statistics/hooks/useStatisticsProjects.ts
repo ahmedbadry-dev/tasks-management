@@ -1,41 +1,24 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { queryKeys } from '@/lib/queryKeys'
 import { getStatisticsProjectsAction } from '../actions/getStatisticsProjectsAction'
-import type { StatisticsProject } from '../types'
 
 export function useStatisticsProjects() {
-  const [projects, setProjects] = useState<StatisticsProject[]>([])
-  const [isProjectsLoading, setIsProjectsLoading] = useState(true)
-  const [projectsError, setProjectsError] = useState<string | null>(null)
-
-  const fetchProjects = useCallback(async () => {
-    setIsProjectsLoading(true)
-    setProjectsError(null)
-
-    const result = await getStatisticsProjectsAction()
-
-    if (result.success) {
-      setProjects(result.data)
-    } else {
-      setProjectsError(result.error)
-    }
-
-    setIsProjectsLoading(false)
-  }, [])
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      void fetchProjects()
-    }, 0)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [fetchProjects])
+  const query = useQuery({
+    queryKey: queryKeys.statistics.projects,
+    queryFn: async () => {
+      const result = await getStatisticsProjectsAction()
+      if (!result.success) throw new Error(result.error)
+      return result.data
+    },
+    staleTime: 1000 * 60 * 10,
+  })
 
   return {
-    projects,
-    isProjectsLoading,
-    projectsError,
-    retryProjects: fetchProjects,
+    projects: query.data ?? [],
+    isProjectsLoading: query.isLoading,
+    projectsError: query.error?.message ?? null,
+    retryProjects: () => query.refetch(),
   }
 }

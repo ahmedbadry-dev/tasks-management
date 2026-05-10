@@ -1,18 +1,21 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import { updateProjectEpicAction } from '../actions/updateProjectEpicAction'
-import { useAppDispatch } from '@/store/hooks'
-import { upsertEpicPatch } from '@/store/projectEpicPatchesStore/projectEpicPatchesSlice'
+import { useUpdateEpic } from '../hooks/useUpdateEpic'
 
 type Props = {
   epicId: string
+  projectId: string
   initialDeadline: string
 }
 
 const UPDATE_ERROR_MESSAGE = 'Failed to update epic. Please try again.'
 
-export const EpicsInlineDeadlineField = ({ epicId, initialDeadline }: Props) => {
-  const dispatch = useAppDispatch()
+export const EpicsInlineDeadlineField = ({
+  epicId,
+  projectId,
+  initialDeadline,
+}: Props) => {
+  const updateEpicMutation = useUpdateEpic(epicId, projectId)
 
   // Live date shown in the date picker.
   const [value, setValue] = useState(initialDeadline)
@@ -33,28 +36,21 @@ export const EpicsInlineDeadlineField = ({ epicId, initialDeadline }: Props) => 
       setIsSaving(true)
 
       // Empty string maps to null to remove deadline.
-      const result = await updateProjectEpicAction(epicId, {
-        deadline: nextDate || null,
-      })
-
-      if (!result.ok) {
+      try {
+        await updateEpicMutation.mutateAsync({
+          patch: { deadline: nextDate || null },
+          optimisticEpic: { deadline: nextDate },
+        })
+      } catch {
         setValue(previousValue)
         setIsSaving(false)
-        toast.error(UPDATE_ERROR_MESSAGE)
         return
       }
 
       setStableValue(nextDate)
-      dispatch(
-        upsertEpicPatch({
-          epicId,
-          patch: { deadline: nextDate || null },
-        })
-      )
       setIsSaving(false)
-      toast.success('Epic updated successfully!')
     },
-    [dispatch, epicId, isSaving, stableValue]
+    [isSaving, stableValue, updateEpicMutation]
   )
 
   return (

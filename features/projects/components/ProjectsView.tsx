@@ -1,7 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
-import { projectService } from '../services/projectService'
+import { useCallback, useMemo, useState } from 'react'
 import { PROJECTS_PAGE_SIZE } from '../constants'
 import { ProjectCard } from './ProjectCard'
 import { AddProjectCard } from './AddProjectCard'
@@ -12,35 +11,60 @@ import { MainContentHeader } from '@/shared/components/MainContentHeader'
 import { Pagination } from '@/shared/components/Pagination'
 import { PlusIcon } from '@/shared/components/icons'
 import { TProject } from '../types'
-import { usePaginatedFetch } from '@/hooks/usePaginatedFetch'
 import { routes } from '@/lib/routes'
+import { useDesktopBreakpoint } from '@/hooks/paginated/useDesktopBreakpoint'
+import { useInfiniteScrollSentinel } from '@/hooks/paginated/useInfiniteScrollSentinel'
+import { useProjectsInfiniteQuery } from '../hooks/useProjectsInfiniteQuery'
+import { useProjectsQuery } from '../hooks/useProjectsQuery'
 
-type Props = {
-    accessToken: string
-}
+export const ProjectsView = () => {
+    const [page, setPage] = useState(1)
+    const isDesktop = useDesktopBreakpoint(768)
 
-export const ProjectsView = ({ accessToken }: Props) => {
-    const fetchFn = useCallback(
-        (page: number, signal: AbortSignal) =>
-            projectService.getProjects(accessToken, page, signal),
-        [accessToken]
-    )
+    const paginatedQuery = useProjectsQuery(page, isDesktop !== false)
+    const infiniteQuery = useProjectsInfiniteQuery(isDesktop === false)
 
-    const {
-        items: projects,
-        status,
-        error,
-        currentPage,
-        totalCount,
-        totalPages,
-        isFetchingPage,
-        isInitialLoading,
-        hasNextPage,
-        isDesktop,
-        loaderRef,
-        goToPage,
-        retry,
-    } = usePaginatedFetch<TProject>({ fetchFn, limit: PROJECTS_PAGE_SIZE })
+    const projects = useMemo<TProject[]>(() => {
+        if (isDesktop === false) {
+            return infiniteQuery.data?.pages.flatMap((pageData) => pageData.data) ?? []
+        }
+
+        return paginatedQuery.data?.data ?? []
+    }, [infiniteQuery.data?.pages, isDesktop, paginatedQuery.data?.data])
+
+    const totalCount =
+        isDesktop === false
+            ? infiniteQuery.data?.pages[0]?.totalCount ?? 0
+            : paginatedQuery.data?.totalCount ?? 0
+    const totalPages = Math.ceil(totalCount / PROJECTS_PAGE_SIZE)
+    const currentPage = page
+    const hasNextPage = Boolean(infiniteQuery.hasNextPage)
+    const isFetchingPage =
+        isDesktop === false ? infiniteQuery.isFetchingNextPage : paginatedQuery.isFetching
+    const isInitialLoading =
+        isDesktop === false ? infiniteQuery.isLoading : paginatedQuery.isLoading
+    const error = isDesktop === false
+        ? infiniteQuery.error?.message ?? null
+        : paginatedQuery.error?.message ?? null
+    const hasRootError =
+        isDesktop === false ? infiniteQuery.isError : paginatedQuery.isError
+
+    const retry = useCallback(() => {
+        if (isDesktop === false) {
+            void infiniteQuery.refetch()
+            return
+        }
+
+        void paginatedQuery.refetch()
+    }, [infiniteQuery, isDesktop, paginatedQuery])
+
+    const loaderRef = useInfiniteScrollSentinel({
+        enabled: isDesktop === false,
+        canLoadMore: hasNextPage && !infiniteQuery.isFetchingNextPage,
+        onLoadMore: () => {
+            void infiniteQuery.fetchNextPage()
+        },
+    })
 
     const hasProjects = projects.length > 0
     const hasAnyProjects = totalCount > 0
@@ -51,7 +75,7 @@ export const ProjectsView = ({ accessToken }: Props) => {
     }
 
     //  Error (no data yet)
-    if (status === 'failed' && !hasProjects) {
+    if (hasRootError && !hasProjects) {
         return (
             <ErrorState
                 title="Failed to load projects"
@@ -115,7 +139,7 @@ export const ProjectsView = ({ accessToken }: Props) => {
                     limit={PROJECTS_PAGE_SIZE}
                     isFetchingPage={isFetchingPage}
                     label="projects"
-                    onPageChange={goToPage}
+                    onPageChange={setPage}
                 />
             )}
         </div>

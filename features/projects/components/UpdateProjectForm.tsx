@@ -9,12 +9,12 @@ import { AddUserIcon, BellIcon } from '@/shared/components/icons';
 import { Textarea } from '@/shared/components/Textarea';
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { updateProjectAction } from '../actions/updateProjectAction';
 import { TProject } from '../types';
 import { TUpdateProjectFormSchema, UpdateProjectFormSchema } from '../validations/UpdateProjectFormSchema';
 import { toast } from 'sonner';
 import { routes } from '@/lib/routes';
 import { Spinner } from '@/shared/components/Spinner';
+import { useUpdateProject } from '../hooks/useUpdateProject';
 
 
 type UpdateProjectFormProps = {
@@ -27,6 +27,7 @@ export const UpdateProjectForm = ({ projectDetails }: UpdateProjectFormProps) =>
     const router = useRouter()
 
     const { projectId } = useParams<{ projectId: string }>()
+    const updateProjectMutation = useUpdateProject(projectId)
 
     const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<TUpdateProjectFormSchema>({
         resolver: zodResolver(UpdateProjectFormSchema),
@@ -40,17 +41,17 @@ export const UpdateProjectForm = ({ projectDetails }: UpdateProjectFormProps) =>
 
 
     const onSubmit: SubmitHandler<TUpdateProjectFormSchema> = async (data) => {
-        const result = await updateProjectAction(projectId, {
-            name: data.name,
-            description: data.description ?? null,
-        })
-
-        if (result.ok) {
+        try {
+            await updateProjectMutation.mutateAsync({
+                name: data.name,
+                description: data.description ?? null,
+            })
             toast.success('Project updated successfully!')
             router.push(routes.project.list)
-        } else {
-            toast.error(result.error)
-            setError('root', { message: result.error })
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to update project'
+            toast.error(message)
+            setError('root', { message })
         }
     }
 
@@ -106,7 +107,7 @@ export const UpdateProjectForm = ({ projectDetails }: UpdateProjectFormProps) =>
                             <button
                                 type="button"
                                 className="btn btn-ghost mt-2 max-sm:w-full"
-                                disabled={isSubmitting || isCanceling}
+                                disabled={isSubmitting || updateProjectMutation.isPending || isCanceling}
                                 onClick={handleCancel}
                             >
                                 {isCanceling ? (
@@ -120,9 +121,9 @@ export const UpdateProjectForm = ({ projectDetails }: UpdateProjectFormProps) =>
                             <button
                                 type="submit"
                                 className="btn btn-primary mt-2 max-sm:w-full "
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || updateProjectMutation.isPending}
                             >
-                                {isSubmitting ? (
+                                {isSubmitting || updateProjectMutation.isPending ? (
                                     <span className="inline-flex items-center gap-2">
                                         <Spinner size="sm" label="Updating project" className="border-white/40 border-t-white" />
                                         <span>Updating</span>
