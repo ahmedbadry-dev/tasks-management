@@ -12,9 +12,9 @@ import { addTaskSchema, TAddTaskSchema } from '../validations/addTaskSchema';
 import { toast } from 'sonner';
 import { routes } from '@/lib/routes';
 import { TEpic, TMember } from '@/features/project-epic/types';
-import { addNewTaskAction } from '../actions/addNewTaskAction';
 import { TASK_STATUS_OPTIONS } from '../constants';
 import { Spinner } from '@/shared/components/Spinner';
+import { useAddTask } from '../hooks/useAddTask';
 
 type TAddNewTaskFormProps = {
     projectId: string
@@ -40,6 +40,7 @@ export const AddNewTaskForm = ({
 }: TAddNewTaskFormProps) => {
     const [isCanceling, setIsCanceling] = useState(false)
     const router = useRouter()
+    const addTaskMutation = useAddTask()
     const normalizedStatus: TaskStatus =
         status && isTaskStatus(status)
             ? status
@@ -64,22 +65,22 @@ export const AddNewTaskForm = ({
     const onSubmit: SubmitHandler<TAddTaskSchema> = async (data) => {
         clearErrors('root')
 
-        const result = await addNewTaskAction({
-            project_id: projectId,
-            title: data.title,
-            status: data.status,
-            epic_id: data.epic_id || null,
-            description: data.description || null,
-            assignee_id: data.assignee_id || null,
-            due_date: data.due_date || null,
-        })
-
-        if (result.ok) {
+        try {
+            await addTaskMutation.mutateAsync({
+                project_id: projectId,
+                title: data.title,
+                status: data.status,
+                epic_id: data.epic_id || null,
+                description: data.description || null,
+                assignee_id: data.assignee_id || null,
+                due_date: data.due_date || null,
+            })
             toast.success('Task created successfully!')
             router.push(routes.project.tasks(projectId))
-        } else {
-            toast.error(result.error)
-            setError('root', { message: result.error })
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to create task'
+            toast.error(message)
+            setError('root', { message })
         }
     }
 
@@ -174,7 +175,7 @@ export const AddNewTaskForm = ({
                             <button
                                 type="button"
                                 className="btn btn-ghost mt-2 max-sm:w-full"
-                                disabled={isSubmitting || isCanceling}
+                                disabled={isSubmitting || addTaskMutation.isPending || isCanceling}
                                 onClick={handleCancel}
                             >
                                 {isCanceling ? (
@@ -188,9 +189,9 @@ export const AddNewTaskForm = ({
                             <button
                                 type="submit"
                                 className="btn btn-primary mt-2 max-sm:w-full "
-                                disabled={isSubmitting}
+                                disabled={isSubmitting || addTaskMutation.isPending}
                             >
-                                {isSubmitting ? (
+                                {isSubmitting || addTaskMutation.isPending ? (
                                     <span className="inline-flex items-center gap-2">
                                         <Spinner size="sm" label="Creating task" className="border-white/40 border-t-white" />
                                         <span>Create Task</span>

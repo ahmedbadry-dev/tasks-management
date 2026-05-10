@@ -1,3 +1,5 @@
+'use server'
+
 import { getSession } from '@/features/auth/utils/getSession'
 import { TProjectMember } from '../types'
 import { redirect } from 'next/navigation'

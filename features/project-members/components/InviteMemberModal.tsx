@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { AddUserIcon, CloseIcon, MailIcon } from '@/shared/components/icons'
-import { inviteMemberAction } from '../actions/inviteMemberAction'
 import { toast } from 'sonner'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { SubmitHandler, useForm } from 'react-hook-form'
@@ -10,6 +9,7 @@ import {
   InviteMemberFormSchema,
   TInviteMemberFormSchema,
 } from '../validations/InviteMemberSchema'
+import { useInviteMember } from '../hooks/useInviteMember'
 
 type InviteMemberModalProps = {
   isOpen: boolean
@@ -26,6 +26,7 @@ export const InviteMemberModal = ({
 }: InviteMemberModalProps) => {
   const [feedback, setFeedback] = useState<string | null>(null)
   const [feedbackKind, setFeedbackKind] = useState<'success' | 'error'>('success')
+  const inviteMemberMutation = useInviteMember(projectId)
 
   const {
     register,
@@ -71,23 +72,21 @@ export const InviteMemberModal = ({
   const handleSendInvitation: SubmitHandler<TInviteMemberFormSchema> = async (data) => {
     setFeedback(null)
 
-    const result = await inviteMemberAction({
-      email: data.email.trim(),
-      projectId,
-    })
-
-    if (result.ok) {
+    try {
+      await inviteMemberMutation.mutateAsync(data.email.trim())
       setFeedbackKind('success')
       setFeedback('Invitation sent successfully.')
       reset()
       toast.success('Invitation sent successfully.')
       return
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to send invitation.'
+      setError('root', { message })
+      setFeedbackKind('error')
+      setFeedback(message)
+      toast.error(message)
     }
-
-    setError('root', { message: result.error })
-    setFeedbackKind('error')
-    setFeedback(result.error)
-    toast.error(result.error)
   }
 
   return (
@@ -179,9 +178,11 @@ export const InviteMemberModal = ({
             <button
               type="submit"
               className="btn btn-primary w-full cursor-pointer md:w-[150px]"
-              disabled={isSubmitting}
+              disabled={isSubmitting || inviteMemberMutation.isPending}
             >
-              {isSubmitting ? 'Sending...' : 'Send Invitation'}
+              {isSubmitting || inviteMemberMutation.isPending
+                ? 'Sending...'
+                : 'Send Invitation'}
             </button>
           </div>
         </form>

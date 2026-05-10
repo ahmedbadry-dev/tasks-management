@@ -14,7 +14,7 @@ async function DashboardLayout({ children }: { children: React.ReactNode }) {
             <DashboardView >
                 {children}
             </DashboardView>
-            <ModalHost accessToken={session.accessToken} />
+            <ModalHost />
         </StoreProvider>
 
     )

@@ -1,22 +1,22 @@
 'use client'
 
-import { useCallback, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { MainContentHeader } from '@/shared/components/MainContentHeader'
 import { Pagination } from '@/shared/components/Pagination'
 import { PlusIcon } from '@/shared/components/icons'
 import { PROJECTS_PAGE_SIZE } from '@/features/projects/constants'
-import { usePaginatedFetch } from '@/hooks/usePaginatedFetch'
 import { TEpic } from '../types'
 import { EpicDesktopCard } from './EpicDesktopCard'
 import { EpicMobileCard } from './EpicMobileCard'
 import { EpicsPageSkeleton } from './EpicsPageSkeleton'
 import { NoEpics } from './NoEpics'
 import { routes } from '@/lib/routes'
-import { useAppSelector } from '@/store/hooks'
-import { selectEpicPatchesById } from '@/store/projectEpicPatchesStore/projectEpicPatchesSlice'
-import { getProjectEpicsAction } from '../actions/getProjectEpicsAction'
 import { useDebouncedSearch } from '@/shared/hooks/useDebouncedSearch'
+import { useDesktopBreakpoint } from '@/hooks/paginated/useDesktopBreakpoint'
+import { useInfiniteScrollSentinel } from '@/hooks/paginated/useInfiniteScrollSentinel'
+import { useProjectEpicsQuery } from '../hooks/useProjectEpicsQuery'
+import { useProjectEpicsInfiniteQuery } from '../hooks/useProjectEpicsInfiniteQuery'
 
 
 type Props = {
@@ -24,69 +24,72 @@ type Props = {
 }
 
 export const ProjectEpicsView = ({ projectId }: Props) => {
-    const epicPatchesById = useAppSelector(selectEpicPatchesById)
+    const isDesktop = useDesktopBreakpoint(768)
+    const [page, setPage] = useState(1)
     const [searchTerm, setSearchTerm] = useState('')
     const { inputValue, handleChange } = useDebouncedSearch((term) => {
         setSearchTerm(term)
     })
 
-    const fetchFn = useCallback(
-        async (page: number, signal: AbortSignal) => {
-            const result = await getProjectEpicsAction(projectId, page, searchTerm)
-            if (!result.success) throw new Error(result.error)
-            return result.data
+    useEffect(() => {
+        setPage(1)
+    }, [searchTerm])
+
+    const paginatedQuery = useProjectEpicsQuery(
+        projectId,
+        page,
+        searchTerm,
+        isDesktop !== false
+    )
+    const infiniteQuery = useProjectEpicsInfiniteQuery(
+        projectId,
+        searchTerm,
+        isDesktop === false
+    )
+
+    const epics = useMemo<TEpic[]>(() => {
+        if (isDesktop === false) {
+            return infiniteQuery.data?.pages.flatMap((pageData) => pageData.data) ?? []
+        }
+
+        return paginatedQuery.data?.data ?? []
+    }, [infiniteQuery.data?.pages, isDesktop, paginatedQuery.data?.data])
+
+    const currentPage = page
+    const totalCount =
+        isDesktop === false
+            ? infiniteQuery.data?.pages[0]?.totalCount ?? 0
+            : paginatedQuery.data?.totalCount ?? 0
+    const totalPages = Math.ceil(totalCount / PROJECTS_PAGE_SIZE)
+    const hasNextPage = Boolean(infiniteQuery.hasNextPage)
+    const isFetchingPage =
+        isDesktop === false ? infiniteQuery.isFetchingNextPage : paginatedQuery.isFetching
+    const isInitialLoading =
+        isDesktop === false ? infiniteQuery.isLoading : paginatedQuery.isLoading
+    const hasRootError = isDesktop === false ? infiniteQuery.isError : paginatedQuery.isError
+    const error =
+        isDesktop === false
+            ? infiniteQuery.error?.message ?? null
+            : paginatedQuery.error?.message ?? null
+
+    const retry = () => {
+        if (isDesktop === false) {
+            void infiniteQuery.refetch()
+            return
+        }
+
+        void paginatedQuery.refetch()
+    }
+
+    const loaderRef = useInfiniteScrollSentinel({
+        enabled: isDesktop === false,
+        canLoadMore: hasNextPage && !infiniteQuery.isFetchingNextPage,
+        onLoadMore: () => {
+            void infiniteQuery.fetchNextPage()
         },
-        [projectId, searchTerm]
-    )
+    })
 
-
-    const {
-        items: epics,
-        status,
-        error,
-        currentPage,
-        totalCount,
-        totalPages,
-        isFetchingPage,
-        isInitialLoading,
-        hasNextPage,
-        isDesktop,
-        loaderRef,
-        goToPage,
-        retry,
-    } = usePaginatedFetch<TEpic>({ fetchFn, limit: PROJECTS_PAGE_SIZE })
-
-    const mergedEpics = useMemo(
-        () =>
-            epics.map((epic) => {
-                const patch = epicPatchesById[epic.id]
-                if (!patch) return epic
-
-                const mergedAssignee =
-                    patch.assignee === undefined
-                        ? epic.assignee
-                        : patch.assignee.id === null
-                            ? null
-                            : {
-                                sub: patch.assignee.id,
-                                name: patch.assignee.name,
-                                email: epic.assignee?.email ?? '',
-                                department: epic.assignee?.department ?? null,
-                            }
-
-                return {
-                    ...epic,
-                    title: patch.title ?? epic.title,
-                    description:
-                        patch.description === undefined ? epic.description : patch.description ?? '',
-                    deadline: patch.deadline === undefined ? epic.deadline : patch.deadline ?? '',
-                    assignee: mergedAssignee,
-                }
-            }),
-        [epics, epicPatchesById]
-    )
-
-    const hasEpics = mergedEpics.length > 0
+    const hasEpics = epics.length > 0
     const hasAnyEpics = totalCount > 0
     const isSearching = searchTerm.length > 0
 
@@ -94,7 +97,7 @@ export const ProjectEpicsView = ({ projectId }: Props) => {
         return <EpicsPageSkeleton />
     }
 
-    if (status === 'failed' && !hasEpics) {
+    if (hasRootError && !hasEpics) {
         return (
             <ErrorState
                 title="Failed to load epics"
@@ -130,7 +133,7 @@ export const ProjectEpicsView = ({ projectId }: Props) => {
             >
                 {hasEpics ? (
                     <>
-                        {mergedEpics.map((epic) =>
+                        {epics.map((epic) =>
                             isDesktop ? (
                                 <EpicDesktopCard key={epic.id} {...epic} />
                             ) : (
@@ -140,7 +143,7 @@ export const ProjectEpicsView = ({ projectId }: Props) => {
 
                         {!isDesktop && hasNextPage && <div ref={loaderRef} className="h-10" aria-hidden />}
                     </>
-                ) : status === 'succeeded' && !hasEpics ? (
+                ) : !isInitialLoading && !hasEpics ? (
                     isSearching ? (
                         <p className="type-body-md text-center text-slate-400">
                             No epics found matching your search
@@ -162,7 +165,7 @@ export const ProjectEpicsView = ({ projectId }: Props) => {
                     limit={PROJECTS_PAGE_SIZE}
                     isFetchingPage={isFetchingPage}
                     label="epics"
-                    onPageChange={goToPage}
+                    onPageChange={setPage}
                 />
             )}
         </div>

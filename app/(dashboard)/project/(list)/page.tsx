@@ -8,7 +8,7 @@ const ProjectsPage = async () => {
     if (!session) redirect(routes.auth.signIn)
     return (
         <div>
-            <ProjectsView accessToken={session.accessToken} />
+            <ProjectsView />
         </div>
     )
 }

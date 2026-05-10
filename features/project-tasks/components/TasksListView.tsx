@@ -1,14 +1,17 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { TASKS_PAGE_SIZE } from '../constants'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { Pagination } from '@/shared/components/Pagination'
 import { TasksListTable } from './TasksListTable'
 
-import { useTasksListFetch } from '../hooks/useTasksListFetch'
+import { useDesktopBreakpoint } from '@/hooks/paginated/useDesktopBreakpoint'
 import { TasksListSkeleton } from './TasksListSkeleton'
 import { TasksMobileCard } from './TasksMobileCard'
+import { useTasksListInfiniteQuery } from '../hooks/useTasksListInfiniteQuery'
+import { useTasksListQuery } from '../hooks/useTasksListQuery'
+import { useInfiniteScrollSentinel } from '@/hooks/paginated/useInfiniteScrollSentinel'
 
 type Props = {
     projectId: string
@@ -16,37 +19,59 @@ type Props = {
 }
 
 export const TasksListView = ({ projectId, searchTerm = '' }: Props) => {
-    const {
-        items: tasks,
-        status,
-        error,
-        currentPage,
-        totalCount,
-        totalPages,
-        isFetchingPage,
-        isInitialLoading,
-        isDesktop,
-        loaderRef,
-        goToPage,
-        retry,
-    } = useTasksListFetch({ projectId, searchTerm })
+    const isDesktop = useDesktopBreakpoint(992)
+    const [page, setPage] = useState(1)
 
     useEffect(() => {
-        const handleTaskDetailsUpdated = (event: Event) => {
-            const detail = (event as CustomEvent<{ projectId?: string }>).detail
-            if (detail?.projectId && detail.projectId !== projectId) return
+        setPage(1)
+    }, [searchTerm])
 
-            if (isDesktop === false) {
-                goToPage(1)
-                return
-            }
+    const listQuery = useTasksListQuery(
+        projectId,
+        page,
+        searchTerm,
+        isDesktop !== false
+    )
+    const infiniteQuery = useTasksListInfiniteQuery(
+        projectId,
+        searchTerm,
+        isDesktop === false
+    )
 
-            goToPage(currentPage)
+    const tasks =
+        isDesktop === false
+            ? infiniteQuery.data?.pages.flatMap((pageData) => pageData.data) ?? []
+            : listQuery.data?.data ?? []
+    const totalCount =
+        isDesktop === false
+            ? infiniteQuery.data?.pages[0]?.totalCount ?? 0
+            : listQuery.data?.totalCount ?? 0
+    const currentPage = page
+    const totalPages = Math.ceil(totalCount / TASKS_PAGE_SIZE)
+    const isFetchingPage =
+        isDesktop === false ? infiniteQuery.isFetchingNextPage : listQuery.isFetching
+    const isInitialLoading =
+        isDesktop === false ? infiniteQuery.isLoading : listQuery.isLoading
+    const hasRootError = isDesktop === false ? infiniteQuery.isError : listQuery.isError
+    const error =
+        isDesktop === false
+            ? infiniteQuery.error?.message ?? null
+            : listQuery.error?.message ?? null
+    const retry = () => {
+        if (isDesktop === false) {
+            void infiniteQuery.refetch()
+            return
         }
 
-        window.addEventListener('task-details-updated', handleTaskDetailsUpdated)
-        return () => window.removeEventListener('task-details-updated', handleTaskDetailsUpdated)
-    }, [currentPage, goToPage, isDesktop, projectId])
+        void listQuery.refetch()
+    }
+    const loaderRef = useInfiniteScrollSentinel({
+        enabled: isDesktop === false,
+        canLoadMore: Boolean(infiniteQuery.hasNextPage) && !infiniteQuery.isFetchingNextPage,
+        onLoadMore: () => {
+            void infiniteQuery.fetchNextPage()
+        },
+    })
 
     const hasTasks = tasks.length > 0
     const isSearching = searchTerm.length > 0
@@ -55,7 +80,7 @@ export const TasksListView = ({ projectId, searchTerm = '' }: Props) => {
         return <TasksListSkeleton />
     }
 
-    if (status === 'failed' && !hasTasks) {
+    if (hasRootError && !hasTasks) {
         return (
             <ErrorState
                 title={isSearching ? 'Failed to search tasks' : 'Failed to load tasks'}
@@ -101,7 +126,7 @@ export const TasksListView = ({ projectId, searchTerm = '' }: Props) => {
                     limit={TASKS_PAGE_SIZE}
                     isFetchingPage={isFetchingPage}
                     label="tasks"
-                    onPageChange={goToPage}
+                    onPageChange={setPage}
                 />
             )}
         </div>

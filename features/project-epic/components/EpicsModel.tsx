@@ -3,16 +3,15 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { EpicsModelSkeleton } from './EpicsModelSkeleton'
 import { useEpicDetails } from '../hooks/useEpicDetails'
-import { projectEpicsService } from '../services/projectEpicsService'
-import { RequestStatus, TMember } from '../types'
+import { TMember } from '../types'
 import { EpicsModelDetails } from './EpicsModelDetails'
 import { EpicsModelHeader } from './EpicsModelHeader'
+import { useProjectMembers } from '@/features/project-members/hooks/useProjectMembers'
 
 type Props = {
   isOpen: boolean
   epicId: string | null
   projectId: string | null
-  accessToken: string
   onClose: () => void
 }
 
@@ -20,17 +19,10 @@ export const EpicsModel = ({
   isOpen,
   epicId,
   projectId,
-  accessToken,
   onClose,
 }: Props) => {
   const dialogTitleId = useId()
-
-  // Project members are loaded on demand from the details component
-  // when the assignee field enters edit mode.
-  const [members, setMembers] = useState<TMember[]>([])
-  const [membersStatus, setMembersStatus] = useState<RequestStatus>('idle')
-  const [membersError, setMembersError] = useState<string | null>(null)
-  const [membersProjectId, setMembersProjectId] = useState<string | null>(null)
+  const [shouldLoadMembers, setShouldLoadMembers] = useState(false)
 
   const {
     epicDetails,
@@ -44,33 +36,25 @@ export const EpicsModel = ({
     isOpen,
     epicId,
     projectId,
-    accessToken,
   })
+
+  const membersQuery = useProjectMembers(
+    projectId,
+    isOpen && shouldLoadMembers && Boolean(projectId)
+  )
 
   const selectedEpic = epicDetails
   const epicCode = selectedEpic?.epic_id ?? '-'
   const epicTitle = selectedEpic?.title ?? 'Epic Details'
 
-  const loadMembers = useCallback(async () => {
-    if (!projectId) return
-
-    // Cache members per project to avoid repeated network calls
-    // every time the assignee editor opens.
-    if (membersProjectId === projectId && members.length > 0) return
-
-    setMembersStatus('loading')
-    setMembersError(null)
-
-    try {
-      const data = await projectEpicsService.getProjectMembers(projectId, accessToken)
-      setMembers(data)
-      setMembersProjectId(projectId)
-      setMembersStatus('succeeded')
-    } catch (error) {
-      setMembersStatus('failed')
-      setMembersError(error instanceof Error ? error.message : 'Failed to load members.')
+  const loadMembers = useCallback(() => {
+    if (!shouldLoadMembers) {
+      setShouldLoadMembers(true)
+      return
     }
-  }, [accessToken, members.length, membersProjectId, projectId])
+
+    void membersQuery.refetch()
+  }, [membersQuery, shouldLoadMembers])
 
   useEffect(() => {
     if (!isOpen) return
@@ -109,6 +93,7 @@ export const EpicsModel = ({
         <EpicsModelHeader
           dialogTitleId={dialogTitleId}
           epicId={selectedEpic?.id ?? null}
+          projectId={projectId}
           epicCode={epicCode}
           epicTitle={epicTitle}
           onClose={onClose}
@@ -136,9 +121,17 @@ export const EpicsModel = ({
               detailsError={epicDetailsError}
               isRefreshing={isRefreshing}
               onRetry={retry}
-              members={members}
-              membersStatus={membersStatus}
-              membersError={membersError}
+              members={(membersQuery.data as TMember[] | undefined) ?? []}
+              membersStatus={
+                membersQuery.isError
+                  ? 'failed'
+                  : membersQuery.isLoading
+                    ? 'loading'
+                    : membersQuery.isSuccess
+                      ? 'succeeded'
+                      : 'idle'
+              }
+              membersError={membersQuery.error?.message ?? null}
               onLoadMembers={loadMembers}
             />
           )}

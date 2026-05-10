@@ -1,15 +1,14 @@
 'use client'
 
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import { toast } from 'sonner'
-import { useTaskDetails } from '../hooks/useTaskDetails'
+import { useCallback, useEffect, useId, useState } from 'react'
+import { useTaskDetailsQuery } from '../hooks/useTaskDetailsQuery'
 import { TaskDetailsModalSkeleton } from './TaskDetailsModalSkeleton'
 import { TaskDetailsModalContent } from './TaskDetailsModalContent'
 import { TTask, TUpdateTaskPatch } from '../types'
-import { RequestStatus, TMember, TEpic } from '@/features/project-epic/types'
-import { getProjectMembersAction } from '@/features/project-epic/actions/getProjectMembersAction'
-import { getAllProjectEpicsAction } from '@/features/project-epic/actions/getAllProjectEpicsAction'
-import { updateTaskAction } from '../actions/updateTaskAction'
+import { RequestStatus } from '@/features/project-epic/types'
+import { useProjectMembers } from '@/features/project-members/hooks/useProjectMembers'
+import { useAllProjectEpics } from '@/features/project-epic/hooks/useAllProjectEpics'
+import { useUpdateTask } from '../hooks/useUpdateTask'
 
 
 type Props = {
@@ -21,104 +20,64 @@ type Props = {
 
 export const TaskDetailsModal = ({ isOpen, taskId, projectId, onClose }: Props) => {
     const dialogTitleId = useId()
-    const [currentTask, setCurrentTask] = useState<TTask | null>(null)
-    const [members, setMembers] = useState<TMember[]>([])
-    const [membersStatus, setMembersStatus] = useState<RequestStatus>('idle')
-    const [membersError, setMembersError] = useState<string | null>(null)
-    const [epics, setEpics] = useState<TEpic[]>([])
-    const [epicsStatus, setEpicsStatus] = useState<RequestStatus>('idle')
-    const [epicsError, setEpicsError] = useState<string | null>(null)
-    const hasSuccessfulUpdateRef = useRef(false)
-    const { task, isInitialLoading, hasInitialError, error, retry } = useTaskDetails({
-        isOpen,
-        taskId,
-        projectId,
-    })
+    const [shouldLoadMembers, setShouldLoadMembers] = useState(false)
+    const [shouldLoadEpics, setShouldLoadEpics] = useState(false)
 
-    useEffect(() => {
-        setCurrentTask(task)
-    }, [task])
+    const taskDetailsQuery = useTaskDetailsQuery(taskId, projectId, isOpen)
+    const updateTaskMutation = useUpdateTask(taskId ?? '', projectId ?? '')
+    const membersQuery = useProjectMembers(
+        projectId,
+        isOpen && shouldLoadMembers && Boolean(projectId)
+    )
+    const epicsQuery = useAllProjectEpics(
+        projectId,
+        isOpen && shouldLoadEpics && Boolean(projectId)
+    )
 
     useEffect(() => {
         if (!isOpen) {
-            setCurrentTask(null)
-            setMembers([])
-            setMembersStatus('idle')
-            setMembersError(null)
-            setEpics([])
-            setEpicsStatus('idle')
-            setEpicsError(null)
-            hasSuccessfulUpdateRef.current = false
+            setShouldLoadMembers(false)
+            setShouldLoadEpics(false)
         }
     }, [isOpen])
 
-    const loadMembers = useCallback(async () => {
-        if (!projectId || membersStatus === 'loading' || membersStatus === 'succeeded') return
-
-        setMembersStatus('loading')
-        setMembersError(null)
-
-        const result = await getProjectMembersAction(projectId)
-
-        if (result.success) {
-            setMembers(result.data)
-            setMembersStatus('succeeded')
-        } else {
-            setMembersError(result.error)
-            setMembersStatus('failed')
+    const loadMembers = useCallback(() => {
+        if (!shouldLoadMembers) {
+            setShouldLoadMembers(true)
+            return
         }
-    }, [membersStatus, projectId])
 
-    const loadEpics = useCallback(async () => {
-        if (!projectId || epicsStatus === 'loading' || epicsStatus === 'succeeded') return
+        void membersQuery.refetch()
+    }, [membersQuery, shouldLoadMembers])
 
-        setEpicsStatus('loading')
-        setEpicsError(null)
-
-        const result = await getAllProjectEpicsAction(projectId)
-
-        if (result.success) {
-            setEpics(result.data)
-            setEpicsStatus('succeeded')
-        } else {
-            setEpicsError(result.error)
-            setEpicsStatus('failed')
+    const loadEpics = useCallback(() => {
+        if (!shouldLoadEpics) {
+            setShouldLoadEpics(true)
+            return
         }
-    }, [epicsStatus, projectId])
+
+        void epicsQuery.refetch()
+    }, [epicsQuery, shouldLoadEpics])
 
     const savePatch = useCallback(
         async (patch: TUpdateTaskPatch, nextTask: TTask) => {
-            if (!currentTask) return false
-
-            const previousTask = currentTask
-            setCurrentTask(nextTask)
-
-            const result = await updateTaskAction(currentTask.id, patch)
-
-            if (!result.ok) {
-                setCurrentTask(previousTask)
-                toast.error('Failed to update task. Please try again.')
+            if (!taskId || !projectId) {
                 return false
             }
 
-            hasSuccessfulUpdateRef.current = true
-            toast.success('Task updated successfully!')
-            return true
+            try {
+                await updateTaskMutation.mutateAsync({ patch, nextTask })
+                return true
+            } catch {
+                return false
+            }
         },
-        [currentTask]
+        [projectId, taskId, updateTaskMutation]
     )
 
     const handleClose = useCallback(() => {
-        if (hasSuccessfulUpdateRef.current && projectId) {
-            window.dispatchEvent(
-                new CustomEvent('task-details-updated', {
-                    detail: { projectId },
-                })
-            )
-        }
-
         onClose()
-    }, [onClose, projectId])
+    }, [onClose])
 
     useEffect(() => {
         if (!isOpen) return
@@ -139,6 +98,32 @@ export const TaskDetailsModal = ({ isOpen, taskId, projectId, onClose }: Props) 
     }, [handleClose, isOpen])
 
     if (!isOpen) return null
+
+    const task = taskDetailsQuery.data ?? null
+    const isInitialLoading = taskDetailsQuery.isLoading
+    const hasInitialError = taskDetailsQuery.isError
+    const error = taskDetailsQuery.error?.message ?? null
+    const retry = () => taskDetailsQuery.refetch()
+
+    const members = membersQuery.data ?? []
+    const membersStatus: RequestStatus = membersQuery.isError
+        ? 'failed'
+        : membersQuery.isLoading
+            ? 'loading'
+            : membersQuery.isSuccess
+                ? 'succeeded'
+                : 'idle'
+    const membersError = membersQuery.error?.message ?? null
+
+    const epics = epicsQuery.data ?? []
+    const epicsStatus: RequestStatus = epicsQuery.isError
+        ? 'failed'
+        : epicsQuery.isLoading
+            ? 'loading'
+            : epicsQuery.isSuccess
+                ? 'succeeded'
+                : 'idle'
+    const epicsError = epicsQuery.error?.message ?? null
 
     return (
         <div
@@ -169,16 +154,16 @@ export const TaskDetailsModal = ({ isOpen, taskId, projectId, onClose }: Props) 
                         </div>
                     )}
 
-                    {!isInitialLoading && !hasInitialError && !currentTask && (
+                    {!isInitialLoading && !hasInitialError && !task && (
                         <div className="flex flex-1 items-center justify-center p-5">
                             <p className="type-body-md text-center text-slate-400">Task not found</p>
                         </div>
                     )}
 
-                    {!isInitialLoading && !hasInitialError && currentTask && (
+                    {!isInitialLoading && !hasInitialError && task && (
                         <div className="min-h-0 flex-1 overflow-y-auto">
                             <TaskDetailsModalContent
-                                task={currentTask}
+                                task={task}
                                 onClose={handleClose}
                                 members={members}
                                 membersStatus={membersStatus}

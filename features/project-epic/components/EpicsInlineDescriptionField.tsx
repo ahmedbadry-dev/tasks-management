@@ -1,11 +1,10 @@
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
-import { updateProjectEpicAction } from '../actions/updateProjectEpicAction'
-import { useAppDispatch } from '@/store/hooks'
-import { upsertEpicPatch } from '@/store/projectEpicPatchesStore/projectEpicPatchesSlice'
+import { useUpdateEpic } from '../hooks/useUpdateEpic'
 
 type Props = {
   epicId: string
+  projectId: string
   initialDescription: string
 }
 
@@ -13,9 +12,10 @@ const UPDATE_ERROR_MESSAGE = 'Failed to update epic. Please try again.'
 
 export const EpicsInlineDescriptionField = ({
   epicId,
+  projectId,
   initialDescription,
 }: Props) => {
-  const dispatch = useAppDispatch()
+  const updateEpicMutation = useUpdateEpic(epicId, projectId)
 
   // Click-to-edit mode for the description field.
   const [isEditing, setIsEditing] = useState(false)
@@ -50,27 +50,20 @@ export const EpicsInlineDescriptionField = ({
     setValue(nextDescription ?? '')
     setIsSaving(true)
 
-    const result = await updateProjectEpicAction(epicId, {
-      description: nextDescription,
-    })
-
-    if (!result.ok) {
+    try {
+      await updateEpicMutation.mutateAsync({
+        patch: { description: nextDescription },
+        optimisticEpic: { description: nextDescription ?? '' },
+      })
+    } catch {
       setValue(previousValue)
-      toast.error(UPDATE_ERROR_MESSAGE)
       setIsSaving(false)
       return
     }
 
     setStableValue(nextDescription ?? '')
-    dispatch(
-      upsertEpicPatch({
-        epicId,
-        patch: { description: nextDescription },
-      })
-    )
-    toast.success('Epic updated successfully!')
     setIsSaving(false)
-  }, [dispatch, epicId, isSaving, stableValue, value])
+  }, [isSaving, stableValue, updateEpicMutation, value])
 
   return (
     <div>

@@ -6,10 +6,11 @@ import { routes } from '@/lib/routes'
 import { PlusIcon } from '@/shared/components/icons'
 import { SearchInput } from '@/shared/components/SearchInput'
 import { ErrorState } from '@/shared/components/ErrorState'
-import { useTasksListFetch } from '../hooks/useTasksListFetch'
 import { TasksMobileCard } from './TasksMobileCard'
 import { TasksListSkeleton } from './TasksListSkeleton'
 import { useDebouncedSearch } from '@/shared/hooks/useDebouncedSearch'
+import { useTasksListInfiniteQuery } from '../hooks/useTasksListInfiniteQuery'
+import { useInfiniteScrollSentinel } from '@/hooks/paginated/useInfiniteScrollSentinel'
 
 type Props = {
     projectId: string
@@ -22,16 +23,20 @@ export const TasksMobileView = ({ projectId }: Props) => {
         setSearchTerm(term)
     })
 
-    const {
-        items: tasks,
-        status,
-        error,
-        isInitialLoading,
-        hasNextPage,
-        isFetchingPage,
-        loaderRef,
-        retry,
-    } = useTasksListFetch({ projectId, searchTerm })
+    const query = useTasksListInfiniteQuery(projectId, searchTerm)
+    const tasks = query.data?.pages.flatMap((page) => page.data) ?? []
+    const isInitialLoading = query.isLoading
+    const hasNextPage = Boolean(query.hasNextPage)
+    const isFetchingPage = query.isFetchingNextPage
+    const error = query.error?.message ?? null
+    const retry = () => query.refetch()
+    const loaderRef = useInfiniteScrollSentinel({
+        enabled: true,
+        canLoadMore: hasNextPage && !isFetchingPage,
+        onLoadMore: () => {
+            void query.fetchNextPage()
+        },
+    })
 
     const hasTasks = tasks.length > 0
     const isSearching = searchTerm.length > 0
@@ -62,7 +67,7 @@ export const TasksMobileView = ({ projectId }: Props) => {
             {/* Content */}
             {isInitialLoading ? (
                 <TasksListSkeleton />
-            ) : status === 'failed' && !hasTasks ? (
+            ) : query.isError && !hasTasks ? (
                 <ErrorState
                     title={isSearching ? 'Failed to search tasks' : 'Failed to load tasks'}
                     message={error ?? 'Please try again.'}

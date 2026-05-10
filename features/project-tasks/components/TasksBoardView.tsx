@@ -12,6 +12,7 @@ import {
 import { TasksBoardCard } from './TasksBoardCard'
 import { useBoardDnd } from '../hooks/useBoardDnd'
 import { useVisibleBoardColumns } from '../hooks/useVisibleBoardColumns'
+import { useUpdateTaskStatus } from '../hooks/useUpdateTaskStatus'
 
 type Props = {
     projectId: string
@@ -24,13 +25,13 @@ export const TasksBoardView = ({ projectId, searchTerm = '' }: Props) => {
         []
     )
     const scrollContainerRef = useRef<HTMLDivElement | null>(null)
-    const [refreshVersion, setRefreshVersion] = useState(0)
     const [columnTasksMap, setColumnTasksMap] = useState<Record<string, TTask[]>>(
         () =>
             Object.fromEntries(
                 TASK_STATUS_OPTIONS.map((status) => [status.value, [] as TTask[]])
             )
     )
+    const updateTaskStatusMutation = useUpdateTaskStatus()
     const { visibleColumns, setColumnNode } = useVisibleBoardColumns({
         rootRef: scrollContainerRef,
     })
@@ -44,6 +45,9 @@ export const TasksBoardView = ({ projectId, searchTerm = '' }: Props) => {
         columnTasksMap,
         setColumnTasksMap,
         statusIds,
+        onUpdateStatus: async (taskId: string, status: string) => {
+            await updateTaskStatusMutation.mutateAsync({ taskId, status })
+        },
     })
 
     const handleTasksLoaded = useCallback(
@@ -70,18 +74,6 @@ export const TasksBoardView = ({ projectId, searchTerm = '' }: Props) => {
         },
         []
     )
-
-    useEffect(() => {
-        const handleTaskDetailsUpdated = (event: Event) => {
-            const detail = (event as CustomEvent<{ projectId?: string }>).detail
-            if (detail?.projectId && detail.projectId !== projectId) return
-
-            setRefreshVersion((version) => version + 1)
-        }
-
-        window.addEventListener('task-details-updated', handleTaskDetailsUpdated)
-        return () => window.removeEventListener('task-details-updated', handleTaskDetailsUpdated)
-    }, [projectId])
 
     useEffect(() => {
         setColumnTasksMap(
@@ -114,8 +106,10 @@ export const TasksBoardView = ({ projectId, searchTerm = '' }: Props) => {
                             projectId={projectId}
                             status={status.value}
                             statusLabel={status.label}
-                            isVisible={visibleColumns.has(status.value)}
-                            refreshVersion={refreshVersion}
+                            isVisible={
+                                visibleColumns.size === 0 ||
+                                visibleColumns.has(status.value)
+                            }
                             searchTerm={searchTerm}
                             tasks={columnTasksMap[status.value] ?? []}
                             onTasksLoaded={handleTasksLoaded}
