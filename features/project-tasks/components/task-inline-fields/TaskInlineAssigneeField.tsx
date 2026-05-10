@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import Select, { SingleValue } from 'react-select'
 import { MemberAvatar } from '@/features/project-members/components/MemberAvatar'
 import { RequestStatus, TMember } from '@/features/project-epic/types'
@@ -110,10 +110,6 @@ export const TaskInlineAssigneeField = ({
     [isSaving, members, onSavePatch, task]
   )
 
-  useEffect(() => {
-    onLoadMembers()
-  }, [onLoadMembers])
-
   return (
     <div>
       <FieldLabel>Assignee</FieldLabel>
@@ -134,6 +130,7 @@ export const TaskInlineAssigneeField = ({
           options={options}
           value={selectedOption}
           onChange={(option) => void selectAssignee(option)}
+          onMenuOpen={onLoadMembers}
           menuPortalTarget={getMenuPortalTarget()}
           menuPosition="fixed"
           styles={inlineStyles}

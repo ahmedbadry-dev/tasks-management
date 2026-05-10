@@ -1,10 +1,10 @@
 import { PlusIcon } from '@/shared/components/icons'
 import { useRouter } from 'next/navigation'
 import { routes } from '@/lib/routes'
-import { useColumnInfiniteScroll, useColumnTasksLoader } from '../hooks/useColumnTasks'
+import { useColumnInfiniteScroll } from '../hooks/useColumnInfiniteScroll'
 import { TasksBoardCard } from './TasksBoardCard'
 import { cn } from '@/utils/cn'
-import { useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Spinner } from '@/shared/components/Spinner'
 import { TTask } from '../types'
 import { useDroppable } from '@dnd-kit/core'
@@ -13,6 +13,7 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { useColumnScrollHint } from '../hooks/useColumnScrollHint'
+import { useColumnTasksInfiniteQuery } from '../hooks/useColumnTasksInfiniteQuery'
 
 const STATUS_DOT_STYLES: Record<string, string> = {
     TO_DO: 'bg-slate-600',
@@ -30,7 +31,6 @@ type Props = {
     status: string
     statusLabel: string
     isVisible: boolean
-    refreshVersion: number
     searchTerm?: string
     tasks: TTask[]
     onTasksLoaded: (
@@ -45,7 +45,6 @@ export const TasksBoardColumn = ({
     status,
     statusLabel,
     isVisible,
-    refreshVersion,
     searchTerm = '',
     tasks,
     onTasksLoaded,
@@ -53,23 +52,30 @@ export const TasksBoardColumn = ({
     const router = useRouter()
     const scrollContainerRef = useRef<HTMLDivElement | null>(null)
     const { setNodeRef: setDroppableNodeRef, isOver } = useDroppable({ id: status })
-    const {
-        totalCount,
-        hasMore,
-        isInitialLoading,
-        isFetchingNextPage,
-        hasInitialError,
-        error,
-        retry,
-        loadMore,
-    } = useColumnTasksLoader({
+    const query = useColumnTasksInfiniteQuery(
         projectId,
         status,
-        isVisible,
-        refreshVersion,
         searchTerm,
-        onTasksLoaded,
-    })
+        isVisible
+    )
+    const totalCount = query.data?.pages[0]?.totalCount ?? null
+    const flatTasks = useMemo(
+        () => query.data?.pages.flatMap((page) => page.data) ?? [],
+        [query.data?.pages]
+    )
+    const hasMore = Boolean(query.hasNextPage)
+    const isInitialLoading = query.isLoading
+    const isFetchingNextPage = query.isFetchingNextPage
+    const hasInitialError = query.isError && flatTasks.length === 0
+    const error = query.error?.message ?? null
+    const retry = () => query.refetch()
+    const loadMore = () => {
+        void query.fetchNextPage()
+    }
+
+    useEffect(() => {
+        onTasksLoaded(status, flatTasks, 'replace')
+    }, [flatTasks, onTasksLoaded, status])
     const { sentinelRef } = useColumnInfiniteScroll({
         hasMore,
         isFetchingNextPage,
@@ -86,7 +92,7 @@ export const TasksBoardColumn = ({
     })
 
     const isSearching = searchTerm.length > 0
-    const hasPaginationError = Boolean(error) && !hasInitialError && tasks.length > 0
+    const hasPaginationError = Boolean(error) && !hasInitialError && flatTasks.length > 0
 
     const handleAddTask = () => {
         router.push(routes.project.newTask(projectId, { status }))

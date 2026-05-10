@@ -10,7 +10,6 @@ import {
 } from '@dnd-kit/core'
 import { toast } from 'sonner'
 
-import { updateTaskStatusAction } from '../actions/updateTaskStatusAction'
 import { TTask } from '../types'
 
 type ColumnTasksMap = Record<string, TTask[]>
@@ -19,6 +18,7 @@ type UseBoardDndOptions = {
   columnTasksMap: ColumnTasksMap
   setColumnTasksMap: Dispatch<SetStateAction<ColumnTasksMap>>
   statusIds: string[]
+  onUpdateStatus: (taskId: string, status: string) => Promise<void>
 }
 
 type UseBoardDndResult = {
@@ -79,6 +79,7 @@ export function useBoardDnd({
   columnTasksMap,
   setColumnTasksMap,
   statusIds,
+  onUpdateStatus,
 }: UseBoardDndOptions): UseBoardDndResult {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -170,11 +171,11 @@ export function useBoardDnd({
       columnTasksMapRef.current = optimisticMap
       setColumnTasksMap(optimisticMap)
 
-      const result = await updateTaskStatusAction(task.id, targetColumnId)
-
-      if (!result.success) {
+      try {
+        await onUpdateStatus(task.id, targetColumnId)
+      } catch (error) {
         restoreSnapshot()
-        toast.error(result.error || 'Failed to update task status')
+        toast.error(error instanceof Error ? error.message : 'Failed to update task status')
       }
 
       clearDragState()
@@ -182,6 +183,7 @@ export function useBoardDnd({
     [
       activeTask,
       clearDragState,
+      onUpdateStatus,
       resolveTargetColumnId,
       restoreSnapshot,
       setColumnTasksMap,
